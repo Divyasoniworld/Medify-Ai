@@ -1,0 +1,5 @@
+.toaster {
+  @media (max-width: 768px) {
+    top: 800px !important;
+  }
+}
