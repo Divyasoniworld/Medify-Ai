@@ -350,6 +350,15 @@ top: 500px;
   min-height: 75% !important;
 }
  
+.chat-history{
+  height: 85% !important;
+}
+
+@media (max-width: 768px) {
+  .chat-history{
+    height: 65% !important;
+  }
+}
   
 
   

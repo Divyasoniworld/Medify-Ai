@@ -1,71 +1,181 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/07ZcdVNxi9D
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import Link from "next/link"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import MainNav from "@/components/MainNav"
-import { Menu } from "lucide-react"
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import Link from "next/link";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import MainNav from "@/components/MainNav";
+import { Camera, Menu, Mic, Pill, Plus, SendHorizontal, Image, MicOff, CircleStop, CircleX, History } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-export default function Component() {
+
+export default function chat() {
+
+  const { theme, setTheme } = useTheme();
+  // const { toast } = useToast();
+
+  const handleThemeChange = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const [transcript, setTranscript] = useState("");
+  const [prompt, setPrompt] = useState("");
+  const [recognition, setRecognition] = useState(null);
+  const [permission, setPermission] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  // const [chatMessages, setChatMessages] = useState(chatData);
+  const [showCards, setShowCards] = useState(true);
+
+  useEffect(() => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("SpeechRecognition API is not supported in this browser.");
+      return;
+    }
+
+    const recognitionInstance = new SpeechRecognition();
+    recognitionInstance.continuous = false;
+    recognitionInstance.interimResults = false;
+    recognitionInstance.lang = "en-USA";
+
+    recognitionInstance.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setTranscript(transcript);
+    };
+
+    recognitionInstance.onerror = (event) => {
+      console.error("Speech recognition error", event.error);
+    };
+
+    recognitionInstance.onend = () => {
+      setIsListening(false);
+    };
+
+    setRecognition(recognitionInstance);
+
+    navigator.permissions.query({ name: "microphone" }).then((permissionStatus) => {
+      setPermission(permissionStatus.state);
+      permissionStatus.onchange = () => {
+        setPermission(permissionStatus.state);
+      };
+    });
+  }, []);
+
+  const startRecognition = () => {
+    if (recognition) {
+      recognition.start();
+      setIsListening(true);
+    }
+  };
+
+  const stopRecognition = () => {
+    if (recognition) {
+      recognition.stop();
+      setIsListening(false);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (transcript.trim()) {
+      setChatMessages([...chatMessages, { role: "user", content: transcript }]);
+      setTranscript("");
+      setShowCards(false);
+      // Here you would make the API call to get the AI response and add it to chatMessages
+    }
+  };
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const newImagePreviews = files.map((file) => {
+      return URL.createObjectURL(file);
+    });
+    setImagePreviews([...imagePreviews, ...newImagePreviews]);
+  };
+
+  const handleImageDelete = (index) => {
+    const updatedImagePreviews = imagePreviews.filter((_, i) => i !== index);
+    setImagePreviews(updatedImagePreviews);
+  };
+
+  const handleMicPermition = () => {
+    console.log('permission == "denied"', permission == "denied")
+    if (permission == "denied") {
+      // toast({
+      //   description:
+      //     "Microphone permission denied. Please enable it in your browser settings.",
+
+      // });
+      showToast("Microphone permission denied. Please enable it in your browser settings.")
+    }
+  }
+
+  const historyItems = [
+    "Please provide information about this pills",
+    "Please provide information about this pills",
+    "Please provide information about this pills",
+    "Please provide information about this pills",
+    "Please provide information about this pills",
+    "Please provide information about this pills",
+    "Please provide information about this pills",
+    "Please provide information about this pills",
+    "Please provide information about this pills",
+    "Please provide information about this pills",
+    "Please provide information about this pills",
+    "Chat 2",
+    "Chat 3",
+    "Chat 4",
+    "Chat 5",
+  ];
+
+
   return (
     <div className="flex flex-col h-screen bg-background">
       <div className="flex">
-        <aside className="w-14 flex-col border-r bg-background sticky top-0 h-screen">
+        <aside className="w-14 flex-col border-r bg-background sticky hidden md:flex top-0 h-screen">
           <nav className="flex flex-col items-center gap-4 px-2 py-5">
-            <TooltipProvider>
-              
-              
-              <Tooltip>
-               
-                <TooltipContent side="right">Orders</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="#"
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                    prefetch={false}
-                  >
+              <Sheet>
+                <SheetTrigger asChild>
+                  <button>
                     <Menu className="h-5 w-5" />
-                    <span className="sr-only">Products</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Products</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="#"
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                    prefetch={false}
-                  >
-                    <UsersIcon className="h-5 w-5" />
-                    <span className="sr-only">Customers</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Customers</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="#"
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                    prefetch={false}
-                  >
-                    <LineChartIcon className="h-5 w-5" />
-                    <span className="sr-only">Analytics</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Analytics</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                  </button>
+                </SheetTrigger>
+                <SheetContent className="side-sheet" side="left">
+                  <nav className="grid gap-6 text-lg font-medium">
+                    <Link href="#" className="flex items-center gap-2 text-lg font-semibold">
+                      <Pill className="h-6 w-6" />
+                      <span className="text-foreground text-2xl font-bold transition-colors hover:text-foreground">
+                        Medify<span className='text-[#595bcc]'>AI</span>
+                      </span>
+                    </Link>
+                    <Link href="#" className="text-muted-foreground hover:text-foreground mt-3">
+                      <Button variant="secondary" onClick={() => { alert("hello") }}>
+                        <Plus className='mr-2 size-4 ' />New Chat
+                      </Button>
+                    </Link>
+                    <Link href="#" className="text-foreground hover:text-foreground ml-2">
+                      <div className="flex items-center text-base">
+                        <History className="size-4 mr-2" />
+                        History
+                      </div>
+                    </Link>
+                    <ScrollArea className="chat-history mt-2">
+                      {historyItems.map((item, index) => (
+                        <Link key={index} href="#" className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted-background">
+                          {item}
+                        </Link>
+                      ))}
+                    </ScrollArea>
+                  </nav>
+                </SheetContent>
+              </Sheet>
           </nav>
-          <nav className="mt-auto flex flex-col items-center gap-4 px-2 py-5">
+          {/* <nav className="mt-auto flex flex-col items-center gap-4 px-2 py-5">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -81,7 +191,7 @@ export default function Component() {
                 <TooltipContent side="right">Settings</TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </nav>
+          </nav> */}
         </aside>
         <div className="flex-1 flex flex-col">
           <MainNav />
@@ -141,17 +251,108 @@ export default function Component() {
           </div>
           <div className="sticky bottom-0 bg-card p-4">
             <div className="relative">
-              <Textarea
-                placeholder="Type your message..."
-                name="message"
-                id="message"
-                rows={1}
-                className="min-h-[48px] rounded-2xl resize-none p-4 border border-neutral-400 shadow-sm pr-16"
-              />
-              <Button type="submit" size="icon" className="absolute w-8 h-8 top-3 right-3" disabled>
-                <ArrowUpIcon className="w-4 h-4" />
-                <span className="sr-only">Send</span>
-              </Button>
+              <form
+                onSubmit={handleSubmit}
+                className="relative chat-box md:mt-4 overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
+                x-chunk="dashboard-03-chunk-1"
+              >
+                <Label htmlFor="message" className="sr-only">
+                  Message
+                </Label>
+                <Textarea
+                  id="message"
+                  value={transcript}
+                  onChange={(e) => {
+                    setTranscript(e.target.value);
+                  }}
+                  placeholder={isListening ? "Listening..." : "Type your message here..."}
+                  className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-3"
+                />
+                <div className="flex items-center p-3 pt-0">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <label>
+                          <Button variant="ghost" size="icon" asChild>
+                            <div>
+                              <Image className="size-5" />
+                              <span className="sr-only">Attach file</span>
+                            </div>
+                          </Button>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImageUpload}
+                          />
+                        </label>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">Attach File</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <label className="flex items-center">
+                          <Button variant="ghost" size="icon" asChild>
+                            <div>
+                              <Camera className="size-5" />
+                              <span className="sr-only">Upload image</span>
+                            </div>
+                          </Button>
+                          <input
+                            type="file"
+                            capture="environment"
+                            className="hidden"
+                            onChange={handleImageUpload}
+                          />
+                        </label>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">Upload image</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <label className="flex items-center">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={isListening ? stopRecognition : startRecognition}
+                            className={isListening ? "bg-red-500 hover:bg-red-500" : ""}
+                          >
+                            {permission == 'denied' ? <MicOff className="size-5" onClick={handleMicPermition} /> : (isListening) ? <CircleStop className="size-5" /> : <Mic className="size-5" />}
+                          </Button>
+                        </label>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        {isListening ? "Stop Listening" : "Start Listening"}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <div className="ml-auto flex items-center space-x-2">
+                    <Button type="submit" size="icon">
+                      <SendHorizontal className="size-4" />
+                      <span className="sr-only">Send</span>
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center p-3 pt-0">
+                  {imagePreviews.map((image, index) => (
+                    <div key={index} className="relative mr-2 mb-2">
+                      <img src={image} alt={`Preview ${index}`} className="h-16 w-16 rounded-md" />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleImageDelete(index)}
+                        className="cancel_preview absolute top-0 right-7 m-1"
+                      >
+                        <CircleX className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -159,48 +360,6 @@ export default function Component() {
     </div>
   )
 }
-
-function ArrowUpIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m5 12 7-7 7 7" />
-      <path d="M12 19V5" />
-    </svg>
-  )
-}
-
-
-function HomeIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
-  )
-}
-
 
 function LineChartIcon(props) {
   return (
@@ -218,29 +377,6 @@ function LineChartIcon(props) {
     >
       <path d="M3 3v18h18" />
       <path d="m19 9-5 5-4-4-3 3" />
-    </svg>
-  )
-}
-
-
-function PackageIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m7.5 4.27 9 5.15" />
-      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-      <path d="m3.3 7 8.7 5 8.7-5" />
-      <path d="M12 22V12" />
     </svg>
   )
 }
@@ -265,29 +401,6 @@ function SettingsIcon(props) {
     </svg>
   )
 }
-
-
-function ShoppingCartIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="8" cy="21" r="1" />
-      <circle cx="19" cy="21" r="1" />
-      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-    </svg>
-  )
-}
-
 
 function UsersIcon(props) {
   return (

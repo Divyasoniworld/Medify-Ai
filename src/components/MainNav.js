@@ -82,7 +82,7 @@ const MainNav = () => {
                             </div>
                         </Link>
 
-                        <ScrollArea className="max-h-60 mt-2">
+                        <ScrollArea className="chat-history mt-2">
                             {historyItems.map((item, index) => (
                                 <Link key={index} href="#" className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted-background">
                                     {item}
