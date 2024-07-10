@@ -10,7 +10,8 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
+import axios from "axios";
+import Cards from "@/components/Cards";
 
 export default function chat() {
 
@@ -29,6 +30,11 @@ export default function chat() {
   const [imagePreviews, setImagePreviews] = useState([]);
   // const [chatMessages, setChatMessages] = useState(chatData);
   const [showCards, setShowCards] = useState(true);
+
+  const [chatHistory, setChatHistory] = useState([])
+
+  console.log('chatHistory', chatHistory)
+  console.log('imagePreviews', imagePreviews)
 
   useEffect(() => {
     const SpeechRecognition =
@@ -80,21 +86,58 @@ export default function chat() {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (transcript.trim()) {
-      setChatMessages([...chatMessages, { role: "user", content: transcript }]);
-      setTranscript("");
-      setShowCards(false);
-      // Here you would make the API call to get the AI response and add it to chatMessages
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   if (transcript.trim()) {
+  //     setChatMessages([...chatMessages, { role: "user", content: transcript }]);
+  //     setTranscript("");
+  //     setShowCards(false);
+  //   }
+  // };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      // Create a new message object for the user's input
+      const userMessage = { role: 'user', response: transcript };
+
+      // Update chat history state to include the user's message
+      setChatHistory(prev => [...prev, userMessage]);
+
+      // Clear input field after updating state
+      setTranscript('');
+      setImagePreviews([]);
+
+      const result = await axios.post('/api/medifyai', { transcript, imagePreviews });
+      const aiResponse = { role: 'AI', response: result.data.response };
+
+      // Update chat history state to include the AI's response
+      setChatHistory(prev => [...prev, aiResponse]);
+    } catch (error) {
+      console.error('Error calling API:', error);
+      // setResponse('An error occurred while fetching the data.');
     }
   };
 
+  const [imageData, setImageData] = useState([])
+
+
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
+
+    // Process each file to create an object with path and mimeType
     const newImagePreviews = files.map((file) => {
-      return URL.createObjectURL(file);
+      const path = URL.createObjectURL(file); // Get path (URL) for preview
+      const mimeType = file.type; // Get mimeType of the file
+
+      // Return object with path and mimeType
+      return {
+        path,
+        mimeType,
+      };
     });
+
+    // Assuming imagePreviews is your state array holding these objects
     setImagePreviews([...imagePreviews, ...newImagePreviews]);
   };
 
@@ -139,41 +182,41 @@ export default function chat() {
       <div className="flex">
         <aside className="w-14 flex-col border-r bg-background sticky hidden md:flex top-0 h-screen">
           <nav className="flex flex-col items-center gap-4 px-2 py-5">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <button>
-                    <Menu className="h-5 w-5" />
-                  </button>
-                </SheetTrigger>
-                <SheetContent className="side-sheet" side="left">
-                  <nav className="grid gap-6 text-lg font-medium">
-                    <Link href="#" className="flex items-center gap-2 text-lg font-semibold">
-                      <Pill className="h-6 w-6" />
-                      <span className="text-foreground text-2xl font-bold transition-colors hover:text-foreground">
-                        Medify<span className='text-[#595bcc]'>AI</span>
-                      </span>
-                    </Link>
-                    <Link href="#" className="text-muted-foreground hover:text-foreground mt-3">
-                      <Button variant="secondary" onClick={() => { alert("hello") }}>
-                        <Plus className='mr-2 size-4 ' />New Chat
-                      </Button>
-                    </Link>
-                    <Link href="#" className="text-foreground hover:text-foreground ml-2">
-                      <div className="flex items-center text-base">
-                        <History className="size-4 mr-2" />
-                        History
-                      </div>
-                    </Link>
-                    <ScrollArea className="chat-history mt-2">
-                      {historyItems.map((item, index) => (
-                        <Link key={index} href="#" className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted-background">
-                          {item}
-                        </Link>
-                      ))}
-                    </ScrollArea>
-                  </nav>
-                </SheetContent>
-              </Sheet>
+            <Sheet>
+              <SheetTrigger asChild>
+                <button>
+                  <Menu className="h-5 w-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent className="side-sheet" side="left">
+                <nav className="grid gap-6 text-lg font-medium">
+                  <Link href="#" className="flex items-center gap-2 text-lg font-semibold">
+                    <Pill className="h-6 w-6" />
+                    <span className="text-foreground text-2xl font-bold transition-colors hover:text-foreground">
+                      Medify<span className='text-[#595bcc]'>AI</span>
+                    </span>
+                  </Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground mt-3">
+                    <Button variant="secondary" onClick={() => { alert("hello") }}>
+                      <Plus className='mr-2 size-4 ' />New Chat
+                    </Button>
+                  </Link>
+                  <Link href="#" className="text-foreground hover:text-foreground ml-2">
+                    <div className="flex items-center text-base">
+                      <History className="size-4 mr-2" />
+                      History
+                    </div>
+                  </Link>
+                  <ScrollArea className="chat-history mt-2">
+                    {historyItems.map((item, index) => (
+                      <Link key={index} href="#" className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted-background">
+                        {item}
+                      </Link>
+                    ))}
+                  </ScrollArea>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </nav>
           {/* <nav className="mt-auto flex flex-col items-center gap-4 px-2 py-5">
             <TooltipProvider>
@@ -197,56 +240,47 @@ export default function chat() {
           <MainNav />
           <div className="flex-1 overflow-auto pt-16 p-4">
             <div className="grid gap-4">
-              <div className="flex items-start gap-3">
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src="/placeholder-user.jpg" />
-                  <AvatarFallback>YO</AvatarFallback>
-                </Avatar>
-                <div className="bg-muted rounded-lg p-3 max-w-[80%]">
-                  <p className="text-sm">Hi ChatGPT, can you explain how airplane turbulence works?</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 justify-end">
-                <div className="bg-primary rounded-lg p-3 max-w-[80%] text-primary-foreground">
-                  <p className="text-sm">
-                    Absolutely! Airplane turbulence happens when the plane encounters pockets of air that are moving
-                    differently. It's like driving on a bumpy road - the plane can feel like it's bouncing or shaking a
-                    bit. It's completely normal and usually not dangerous at all.
-                  </p>
-                </div>
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src="/placeholder-user.jpg" />
-                  <AvatarFallback>GPT</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex items-start gap-3">
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src="/placeholder-user.jpg" />
-                  <AvatarFallback>YO</AvatarFallback>
-                </Avatar>
-                <div className="bg-muted rounded-lg p-3 max-w-[80%]">
-                  <p className="text-sm">
-                    That makes sense, thanks for the explanation! Is there anything I can do to make turbulence less
-                    uncomfortable?
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 justify-end">
-                <div className="bg-primary rounded-lg p-3 max-w-[80%] text-primary-foreground">
-                  <p className="text-sm">Here are a few tips to help make turbulence less uncomfortable:</p>
-                  <ul className="list-disc pl-4 space-y-1 mt-2">
-                    <li>Stay seated with your seatbelt fastened</li>
-                    <li>Avoid getting up during turbulence</li>
-                    <li>Take slow, deep breaths to stay calm</li>
-                    <li>Bring noise-cancelling headphones to block out the noise</li>
-                    <li>Bring a book or magazine to distract yourself</li>
-                  </ul>
-                </div>
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src="/placeholder-user.jpg" />
-                  <AvatarFallback>GPT</AvatarFallback>
-                </Avatar>
-              </div>
+              {
+                chatHistory.length > 0 ?
+                  (
+                    chatHistory.map((chat, index) => {
+                      return (
+
+                        (chat.role) != "AI" ?
+                          (
+                            <div className='flex items-start gap-3 justify-end'>
+                              <div className="bg-primary rounded-lg p-3 max-w-[80%] text-primary-foreground">
+                                <p className="text-sm">
+                                  {chat.response}
+                                </p>
+                              </div>
+                              <Avatar className="w-8 h-8">
+                                <AvatarImage src="/placeholder-user.jpg" />
+                                <AvatarFallback>Me</AvatarFallback>
+                              </Avatar>
+                            </div>
+                          ) : (
+                            <div className="flex items-start gap-3">
+                              <Avatar className="w-8 h-8">
+                                <AvatarImage src="/placeholder-user.jpg" />
+                                <AvatarFallback>AI</AvatarFallback>
+                              </Avatar>
+                              <div className="bg-muted rounded-lg p-3 max-w-[80%]">
+                                <p className="text-sm">
+                                  {chat.response}
+                                </p>
+                              </div>
+                            </div>
+                          )
+
+
+
+
+                      )
+                    })
+                  ) : <Cards />
+
+              }
             </div>
           </div>
           <div className="sticky bottom-0 bg-card p-4">
@@ -340,7 +374,7 @@ export default function chat() {
                 <div className="flex flex-wrap items-center p-3 pt-0">
                   {imagePreviews.map((image, index) => (
                     <div key={index} className="relative mr-2 mb-2">
-                      <img src={image} alt={`Preview ${index}`} className="h-16 w-16 rounded-md" />
+                      <img src={image.path} alt={`Preview ${index}`} className="h-16 w-16 rounded-md" />
                       <Button
                         variant="ghost"
                         size="icon"
