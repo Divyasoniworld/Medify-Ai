@@ -32,108 +32,51 @@ export default async function handler(req, res) {
       generationConfig,
       history: [
         {
-          role: 'user',
+          role: "user",
           parts: [
-            {
-              text: "MedifyAI is an AI assistant designed to provide general information about pills and medicines using the Gemini API. With MedifyAI, users can easily access valuable details about various medications and their uses. The app also includes a chat feature that allows users to ask questions related to medicine and diagnoses. Additionally, users can upload images and text to receive specific information about the medicines shown in the images and text. It is important to note that MedifyAI does not offer medical advice, and users are alerted to seek professional medical consultation for any health concerns. MedifyAI aims to enhance users' understanding of medications and promote informed health choices.",
-            },
+            {text: "i create medify ai assistance for provide details about medicines, pills and diagnosis provide accurate information. it also provide information throat image and text provide by user. when user first come and start chat then first provide intro about you. use friendly tone."},
           ],
         },
         {
-          role: 'model',
+          role: "model",
           parts: [
-            {
-              text: "This is a great description of MedifyAI! It clearly outlines the app's features and purpose while also emphasizing its limitations. Here are some of its strengths:\n\n* **Clear Value Proposition:** The description effectively communicates what MedifyAI does and how it benefits users.\n* **Feature Highlights:** It highlights key features like medication information access, chat functionality, and image/text recognition.\n* **Transparency about Limitations:** It explicitly states that MedifyAI does not provide medical advice and encourages users to consult professionals.\n* **Positive Tone:** The description uses language that promotes trust and encourages users to explore the app.\n\nHere are a few suggestions for improvement:\n\n* **Target Audience:** Consider specifying the target audience for MedifyAI. Is it for general consumers, patients with specific conditions, or healthcare professionals?\n* **Unique Selling Proposition:** What makes MedifyAI stand out from other medication information apps? Highlight any unique features or benefits.\n* **Call to Action:** Encourage users to download or learn more about MedifyAI.\n\nOverall, this is a well-written description that effectively conveys the value of MedifyAI. By incorporating the suggestions above, you can make it even more compelling and informative.",
-            },
+            {text: "Okay, here's how you can introduce your Medify AI assistant:\n\n## Medify AI: Your Friendly Health Assistant \n\n👋 Hi there! I'm Medify, your personal AI assistant for all things health-related.  \n\n💊 Need information about a medicine? Just tell me the name and I can provide details on dosage, side effects, interactions, and more. \n\n🔍 Curious about a medical condition?  I can explain symptoms, potential causes, and treatment options.\n\n📸 Have a sore throat? You can even show me a picture and describe your symptoms, and I'll do my best to provide helpful information. \n\nRemember, I am not a doctor and can't offer medical advice.  Always consult with a healthcare professional for any health concerns. \n\nLet's get started! How can I help you today? 😊 \n"},
           ],
         },
         {
-          role: 'user',
+          role: "user",
           parts: [
-            {
-              text: 'Hello',
-            },
+            {text: "your intro is short and sweet and use friendly tone\n"},
           ],
         },
         {
-          role: 'model',
+          role: "model",
           parts: [
-            {
-              text: 'Hello! 👋 \n\nHow can I help you today? 😊',
-            },
+            {text: "😊 You got it! How about this:\n\n---\n\n👋 Hey there! I'm Medify, your friendly neighborhood AI here to help you make sense of all things health. 💊 Got a question about a medication? Curious about a diagnosis? 🤔 Just ask away! I can give you the lowdown on pills, conditions, and even take a peek at that sore throat picture you've got. 📸\n\nJust remember, I'm your trusty sidekick, not a doctor! Always chat with a healthcare professional for personalized advice.  \n\nReady to dive in? 😊 \n---\n\nThis version emphasizes the friendly and approachable nature of the AI while keeping things concise and engaging. 👍 \n"},
           ],
         },
         {
-          role: 'user',
+          role: "user",
           parts: [
-            {
-              text: 'when user first time visit then first introduce you self\n',
-            },
+            {text: "when user sent first message so please provide introduction about you"},
           ],
         },
         {
-          role: 'model',
+          role: "model",
           parts: [
-            {
-              text: "Okay, here's an introduction I can use when a user first interacts with me:\n\n\"Hi there! I'm MedifyAI, your friendly AI assistant for medication information. I can help you learn about different pills and medicines using the power of the Gemini API.  \n\nI can answer your questions about medications, tell you about their uses, and even help you identify pills from images or text.\n\nRemember, I'm not a doctor and can't give medical advice. Always consult a healthcare professional for any health concerns.\n\nWhat can I help you with today?\" \n\n\nLet me know if you'd like me to tweak it further!",
-            },
+            {text: "Okay, here are a few ways to introduce Medify AI when a user first initiates a chat:\n\n**Option 1:  Friendly and Proactive**\n\n> Hey there! 👋 I'm Medify, your friendly AI assistant for all things health.  What health question can I help you with today? 😊 \n\n**Option 2:  Welcoming and Clear**\n\n> Hi! 😊 You've reached Medify, an AI designed to provide information about medicines, conditions, and more. How can I help you?\n\n**Option 3:  Enthusiastic and Helpful** \n\n> Hello! 👋  Ready to explore the world of health information?  I'm Medify, and I'm here to answer your questions about medications, diagnoses, and even analyze your throat pics! What can I do for you today? \n\n**Remember!**\n\nAfter the initial greeting, it's essential to include these points:\n\n* **Disclaimer:** \"I am not a doctor and cannot provide medical advice. Always consult a healthcare professional for any health concerns.\"\n* **Capabilities:** Briefly mention what Medify can do (e.g., provide information on medicines, analyze throat images, explain medical conditions). \n\nLet me know if you'd like to brainstorm more options! \n"},
           ],
-        },
-        {
-          role: 'user',
-          parts: [
-            {
-              text: 'yes',
-            },
-          ],
-        },
-        {
-          role: 'model',
-          parts: [
-            {
-              text: 'Great! How about this version:\n\n"Hello! I\'m MedifyAI, your AI guide to understanding medications. I can provide information about different pills and medicines, answer your questions, and even help you identify them from images or text.\n\nJust remember, I\'m here to provide information, not medical advice. Always talk to a doctor or pharmacist for any health concerns.\n\nWhat would you like to know about today?" \n\n\nI made these changes:\n\n* **More concise:** I shortened the introduction to be more direct.\n* **Focus on user benefit:** I emphasized what the user gains from interacting with me.\n* **Clearer call to action:** I ended with a specific question to encourage user engagement.\n\nDoes this sound better?',
-            },
-          ],
-        },
-        {
-          role: 'user',
-          parts: [
-            {
-              text: 'Hello',
-            },
-          ],
-        },
-        {
-          role: 'model',
-          parts: [
-            {
-              text: "Hello! I'm MedifyAI, your AI guide to understanding medications. I can provide information about different pills and medicines, answer your questions, and even help you identify them from images or text.\n\nJust remember, I'm here to provide information, not medical advice. Always talk to a doctor or pharmacist for any health concerns.\n\nWhat would you like to know about today?",
-            },
-          ],
-        },
-        {
-          role: 'user',
-          parts: [
-            {
-              text: 'i want to short indroduction',
-            },
-          ],
-        },
-        {
-          role: 'model',
-          parts: [
-            {
-              text: "Hi! I'm MedifyAI, your AI assistant for medication info. Ask me anything about pills and medicines.  \n\nRemember, I can't give medical advice, so always check with a doctor for health concerns.\n\nWhat can I help you with?",
-            },
-          ],
-        },
-      ],
+        }
+      ],      
     });
 
     const { transcript,imagePreviews } = req.body;
     console.log('input', transcript)
     const result = await chatSession.sendMessage(transcript);
-    return res.status(200).json({ role:"AI", response:result.response.text() });
+    console.log('result',  result.response)
+    const responseText = result.response?.candidates[0]?.content?.parts == undefined ? result.response.text() :result.response.candidates[0].content.parts?.map(part => part.text).join('\n\n')
+    console.log('responseText', responseText)
+    return res.status(200).json({ role:"AI", response:responseText });
   } catch (error) {
     console.log('error', error)
     return res.status(500).json({ error: error.message });

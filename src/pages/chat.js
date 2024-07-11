@@ -96,8 +96,8 @@ export default function chat() {
   // };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
     try {
+      e.preventDefault()
       // Create a new message object for the user's input
       const userMessage = { role: 'user', response: transcript };
 
@@ -176,6 +176,37 @@ export default function chat() {
     "Chat 5",
   ];
 
+  // Function to render formatted text
+  // const renderFormattedText = (text) => {
+  //   // Replace \n with <br> for line breaks
+  //   const parts = text.split('\n');
+
+  //   return parts.map((part, index) => (
+  //     <React.Fragment key={index}>
+  //       {index > 0 && <br />} {/* Add <br> after each line except the first */}
+  //       {part}
+  //     </React.Fragment>
+  //   ));
+  // };.
+
+  const formatText = (text) => {
+    // Replace *bold* with <strong>bold</strong>
+    text = text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+
+    // Replace \n with <br> for line breaks
+    text = text.replace(/\n/g, '<br>');
+
+    // Replace - list item with <li>list item</li>
+    text = text.replace(/^- (.*)/gm, '<li>$1</li>');
+
+    // Wrap in <ul> if there are list items
+    if (text.includes('<li>')) {
+      text = `<ul>${text}</ul>`;
+    }
+
+    // Render as HTML
+    return { __html: text };
+  };
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -266,9 +297,9 @@ export default function chat() {
                                 <AvatarFallback>AI</AvatarFallback>
                               </Avatar>
                               <div className="bg-muted rounded-lg p-3 max-w-[80%]">
-                                <p className="text-sm">
-                                  {chat.response}
-                                </p>
+                              {typeof chat.response === 'string' && (
+          <div dangerouslySetInnerHTML={formatText(chat.response)} />
+        )}
                               </div>
                             </div>
                           )
@@ -365,7 +396,7 @@ export default function chat() {
                     </Tooltip>
                   </TooltipProvider>
                   <div className="ml-auto flex items-center space-x-2">
-                    <Button type="submit" size="icon">
+                    <Button disabled={transcript === ""}  type="submit" size="icon">
                       <SendHorizontal className="size-4" />
                       <span className="sr-only">Send</span>
                     </Button>
