@@ -119,6 +119,9 @@ export default function chat() {
     }
   };
 
+
+
+
   const [imageData, setImageData] = useState([])
 
 
@@ -297,16 +300,12 @@ export default function chat() {
                                 <AvatarFallback>AI</AvatarFallback>
                               </Avatar>
                               <div className="bg-muted rounded-lg p-3 max-w-[80%]">
-                              {typeof chat.response === 'string' && (
-          <div dangerouslySetInnerHTML={formatText(chat.response)} />
-        )}
+                                {typeof chat.response === 'string' && (
+                                  <div dangerouslySetInnerHTML={formatText(chat.response)} />
+                                )}
                               </div>
                             </div>
                           )
-
-
-
-
                       )
                     })
                   ) : <Cards />
@@ -396,7 +395,7 @@ export default function chat() {
                     </Tooltip>
                   </TooltipProvider>
                   <div className="ml-auto flex items-center space-x-2">
-                    <Button disabled={transcript === ""}  type="submit" size="icon">
+                    <Button disabled={transcript === ""} type="submit" size="icon">
                       <SendHorizontal className="size-4" />
                       <span className="sr-only">Send</span>
                     </Button>
