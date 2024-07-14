@@ -1,58 +1,56 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function SendMessage() {
-  const [transcript, setTranscript] = useState('');
-  const [response, setResponse] = useState('');
+const demo = () => {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    try {
-      const res = await fetch('/api/hello', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ transcript })
-      });
+    const newMessage = { role: 'user', message: input };
+    setMessages([...messages, newMessage]);
 
-      if (!res.ok) {
-        throw new Error('Network response was not ok');
-      }
+    const response = await fetch('/api/hello', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ transcript: input }),
+    });
 
-      // Read the response body as a stream
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let resultText = '';
-
-      // Read the stream in chunks
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        resultText += decoder.decode(value, { stream: true });
-      }
-
-      setResponse(resultText);
-
-    } catch (error) {
-      console.error('Error:', error);
+    if (response.ok) {
+      const eventSource = new EventSource('/api/hello');
+      eventSource.onmessage = (event) => {
+        const parsedData = JSON.parse(event.data);
+        setMessages((prevMessages) => [...prevMessages, parsedData]);
+      };
+      
+      eventSource.onerror = () => {
+        eventSource.close();
+      };
     }
+
+    setInput('');
   };
 
   return (
     <div>
+      <div>
+        {messages.map((msg, index) => (
+          <div key={index} className={msg.role === 'user' ? 'user-message' : 'ai-message'}>
+            {msg.message}
+          </div>
+        ))}
+      </div>
       <form onSubmit={handleSubmit}>
-        <textarea
-          value={transcript}
-          onChange={(e) => setTranscript(e.target.value)}
-          placeholder="Enter your message"
+        <input 
+          type="text" 
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
         />
         <button type="submit">Send</button>
       </form>
-      <div>
-        <h3>Response:</h3>
-        <pre>{response}</pre>
-      </div>
     </div>
   );
-}
+};
+
+export default demo;

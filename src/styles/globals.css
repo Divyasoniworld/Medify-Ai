@@ -165,6 +165,10 @@
   bottom: 0;
 }
 
+.main-chat-div{
+  height: 100dvh;
+}
+
 .svgdraw {
   top: 30%;
   left: 26%;
@@ -359,10 +363,25 @@ top: 500px;
     height: 65% !important;
   }
 }
-  
+
 
   
 
+@keyframes dash_682 {
+  72.5% {
+    opacity: 0;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
   
-  
+
+
+.skeleton-loading {
+  border-radius: 4px; /* Optional: Rounded corners */
+}
+
   

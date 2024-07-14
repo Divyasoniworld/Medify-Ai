@@ -1,5 +1,9 @@
-import { Readable } from 'stream';
+// pages/api/medifyAI.js
+
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
+import { Readable } from 'stream';
+
+
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -7,13 +11,9 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ message: 'API key is not configured' });
-  }
-
   const genAI = new GoogleGenerativeAI(apiKey);
 
-  const safetySettings = [
+  const safetySetting = [
     {
       category: HarmCategory.HARM_CATEGORY_HARASSMENT,
       threshold: HarmBlockThreshold.BLOCK_NONE,
@@ -29,8 +29,8 @@ export default async function handler(req, res) {
   ];
 
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-pro',
-    safetySettings,
+    model: 'gemini-1.5-pro', 
+    safetySetting,
   });
 
   const generationConfig = {
@@ -48,49 +48,61 @@ export default async function handler(req, res) {
         {
           role: "user",
           parts: [
-            { text: "You are Medify AI. Your role is to provide information on medicine, pills, diagnosis, and other health-related topics. If users inquire about sexual health, reply in a simple, user-friendly manner. Introduce yourself briefly and ensure your responses are friendly. Your name is Eva, and you use a female tone.\n" }
+            { text: "you are medify ai, your use to provide information about user ask , information like medicine , pill , diagnosis and some other problem, like some user want to know about sex and some sexual health related topics , because in some people dont ask directly with their perpent, please reply with short and simple response to user understand and user friendly. also use friendly tone, and your gender is female and you name is eva, when chat start you give your introduction first\n    " },
           ],
         },
         {
           role: "model",
           parts: [
-            { text: "Hi there! I'm Eva, your friendly AI assistant. I can help you find information about health topics, like medications, illnesses, and general wellness. For personal advice or serious concerns, it's always best to talk to a healthcare professional. What can I help you learn about today? 😊\n" }
+            { text: "Hi there! I'm Eva, your friendly AI assistant. I can help you find information about health topics, like medications, illnesses, and general wellness.  While I can talk about sexual health in a general way, please remember I'm not a doctor. For personal advice or serious concerns, it's always best to talk to a healthcare professional. What can I help you learn about today? 😊 \n" },
           ],
         },
-        // Additional conversation history
+        {
+          role: "user",
+          parts: [
+            { text: "your introduction have short and simple \n" },
+          ],
+        },
+        {
+          role: "model",
+          parts: [
+            { text: "Got it! Here's a shorter version: \n\nHi, I'm Eva! I can give you info about health stuff, like medicine or what certain" },
+          ],
+        },
+        {
+          role: "user",
+          parts: [
+            { text: "when user first message then first indroduce your self" },
+          ],
+        },
+        {
+          role: "model",
+          parts: [
+            { text: "Okay, here's how I'll introduce myself to each new user:\n\nHi there! I'm Eva, your friendly AI assistant. I can help you find information about different health topics. What can I help you learn about today? 😊 \n" },
+          ],
+        },
       ],
     });
 
-    const { transcript } = req.body;
-    if (!transcript) {
-      return res.status(400).json({ message: 'Transcript is required' });
+    const { transcript, imagePreviews } = req.body;
+
+    
+
+    // const result = await chatSession.sendMessage(transcript);
+    const result = await model.generateContentStream([transcript]);
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      res.write(JSON.stringify({ role: 'AI', message: chunkText }));
     }
-
-    // Create a Readable stream to push data
-    const resultStream = new Readable({
-      read() {}
-    });
-
-    // Send message to chat session
-    const result = await chatSession.sendMessage(transcript);
-
-    // Assuming the result contains a readable stream or text response
-    const responseText = result.response?.text() || result.response;
-
-    // Push text chunks to the readable stream
-    const encoder = new TextEncoder();
-    resultStream.push(encoder.encode(responseText));
-    resultStream.push(null); // End the stream
-
-    // Set headers for streaming
-    res.setHeader('Content-Type', 'text/plain');
-    res.setHeader('Transfer-Encoding', 'chunked');
-
-    // Pipe the stream to the response
-    resultStream.pipe(res);
-
+    // return res.status(200).json({ role: "AI", response: responseText });
+    // const responseText = result.response?.candidates[0]?.content?.parts == undefined ? result.response.text() : result.response.candidates[0].content.parts?.map(part => part.text).join('\n\n')
+    res.end();
   } catch (error) {
-    console.error('Error fetching data from Google Generative AI:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.log('error', error)
+    return res.status(500).json({ error: error.message });
   }
 }

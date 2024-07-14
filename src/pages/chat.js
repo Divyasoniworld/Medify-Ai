@@ -7,16 +7,20 @@ import MainNav from "@/components/MainNav";
 import { Camera, Menu, Mic, Pill, Plus, SendHorizontal, Image, MicOff, CircleStop, CircleX, History } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import axios from "axios";
 import Cards from "@/components/Cards";
+import { Context } from "@/context/ContextProvider";
+import Loader from "@/components/Loader";
 
 export default function chat() {
 
   const { theme, setTheme } = useTheme();
   // const { toast } = useToast();
+
+  const { onSent, recentPrompt, showResult, loading, resultData, setInput, input } = useContext(Context)
 
   const handleThemeChange = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -34,7 +38,7 @@ export default function chat() {
   const [chatHistory, setChatHistory] = useState([])
 
   console.log('chatHistory', chatHistory)
-  console.log('imagePreviews', imagePreviews)
+  // console.log('imagePreviews', imagePreviews)
 
   useEffect(() => {
     const SpeechRecognition =
@@ -95,27 +99,69 @@ export default function chat() {
   //   }
   // };
 
+  // const handleSubmit = async (e) => {
+  //   try {
+  //     e.preventDefault()
+  //     // Create a new message object for the user's input
+  //     const userMessage = { role: 'user', response: transcript };
+
+  //     // Update chat history state to include the user's message
+  //     setChatHistory(prev => [...prev, userMessage]);
+
+  //     // Clear input field after updating state
+  //     setTranscript('');
+  //     setImagePreviews([]);
+
+  //     const result = await axios.post('/api/medifyai', { transcript, imagePreviews });
+  //     const aiResponse = { role: 'AI', response: result.data.response };
+
+  //     // Update chat history state to include the AI's response
+  //     setChatHistory(prev => [...prev, aiResponse]);
+  //   } catch (error) {
+  //     console.error('Error calling API:', error);
+  //     // setResponse('An error occurred while fetching the data.');
+  //   }
+  // };
+
+
   const handleSubmit = async (e) => {
-    try {
-      e.preventDefault()
-      // Create a new message object for the user's input
-      const userMessage = { role: 'user', response: transcript };
+    e.preventDefault();
+    const userMessage = { role: 'user', message: transcript };
+    setChatHistory(prev => [...prev, userMessage]);
+    setTranscript('');
 
-      // Update chat history state to include the user's message
-      setChatHistory(prev => [...prev, userMessage]);
+    const response = await fetch('/api/medifyai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ transcript }),
+    });
 
-      // Clear input field after updating state
-      setTranscript('');
-      setImagePreviews([]);
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
 
-      const result = await axios.post('/api/medifyai', { transcript, imagePreviews });
-      const aiResponse = { role: 'AI', response: result.data.response };
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
 
-      // Update chat history state to include the AI's response
-      setChatHistory(prev => [...prev, aiResponse]);
-    } catch (error) {
-      console.error('Error calling API:', error);
-      // setResponse('An error occurred while fetching the data.');
+      // Decode chunk data
+      const chunk = decoder.decode(value, { stream: true });
+
+      // Update chat history with the current chunk
+      setChatHistory(prev => {
+        const updatedHistory = [...prev];
+        const lastMessage = updatedHistory[updatedHistory.length - 1];
+
+        if (lastMessage && lastMessage.role === 'AI') {
+          lastMessage.message += chunk; // Append the current chunk to the last AI message
+        } else {
+          updatedHistory.push({ role: 'AI', message: chunk }); // Create a new AI message
+        }
+        return updatedHistory;
+      });
+
+      console.log('chunk', chunk);
     }
   };
 
@@ -270,53 +316,52 @@ export default function chat() {
             </TooltipProvider>
           </nav> */}
         </aside>
-        <div className="flex-1 flex flex-col">
+        <div className="main-chat-div flex-1 flex flex-col">
           <MainNav />
           <div className="flex-1 overflow-auto pt-16 p-4">
             <div className="grid gap-4">
-              {
-                chatHistory.length > 0 ?
-                  (
-                    chatHistory.map((chat, index) => {
-                      return (
-
-                        (chat.role) != "AI" ?
-                          (
-                            <div className='flex items-start gap-3 justify-end'>
-                              <div className="bg-primary rounded-lg p-3 max-w-[80%] text-primary-foreground">
-                                <p className="text-sm">
-                                  {chat.response}
-                                </p>
-                              </div>
-                              <Avatar className="w-8 h-8">
-                                <AvatarImage src="/placeholder-user.jpg" />
-                                <AvatarFallback>Me</AvatarFallback>
-                              </Avatar>
-                            </div>
-                          ) : (
-                            <div className="flex items-start gap-3">
-                              <Avatar className="w-8 h-8">
-                                <AvatarImage src="/placeholder-user.jpg" />
-                                <AvatarFallback>AI</AvatarFallback>
-                              </Avatar>
-                              <div className="bg-muted rounded-lg p-3 max-w-[80%]">
-                                {typeof chat.response === 'string' && (
-                                  <div dangerouslySetInnerHTML={formatText(chat.response)} />
-                                )}
-                              </div>
-                            </div>
-                          )
-                      )
-                    })
-                  ) : <Cards />
-
-              }
+              {showResult ? (
+                resultData.map((chat, index) => {
+                  if (chat.role !== "AI") {
+                    return (
+                      <div key={index} className="flex items-start gap-3 justify-end">
+                        <div className="bg-primary rounded-lg p-3 max-w-[80%] text-primary-foreground">
+                          <p className="text-sm">{chat.message}</p>
+                        </div>
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src="/placeholder-user.jpg" />
+                          <AvatarFallback>Me</AvatarFallback>
+                        </Avatar>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div key={index} className="flex items-start gap-3">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src="/placeholder-user.jpg" />
+                          <AvatarFallback>AI</AvatarFallback>
+                        </Avatar>
+                        <div className="bg-muted rounded-lg p-3 max-w-[80%]">
+                          {
+                            typeof chat.message === 'string' && (
+                              <div dangerouslySetInnerHTML={{ __html: chat.message }} />
+                            )
+                          }
+                        </div>
+                      </div>
+                    );
+                  }
+                })
+              ) : (
+                <Cards />
+              )}
             </div>
+
           </div>
           <div className="sticky bottom-0 bg-card p-4">
             <div className="relative">
-              <form
-                onSubmit={handleSubmit}
+              <div
+                // onSubmit={handleSubmit}
                 className="relative chat-box md:mt-4 overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
                 x-chunk="dashboard-03-chunk-1"
               >
@@ -325,10 +370,11 @@ export default function chat() {
                 </Label>
                 <Textarea
                   id="message"
-                  value={transcript}
+                  value={input}
                   onChange={(e) => {
-                    setTranscript(e.target.value);
+                    setInput(e.target.value);
                   }}
+
                   placeholder={isListening ? "Listening..." : "Type your message here..."}
                   className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-3"
                 />
@@ -394,8 +440,8 @@ export default function chat() {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <div className="ml-auto flex items-center space-x-2">
-                    <Button disabled={transcript === ""} type="submit" size="icon">
+                  <div className="ml-auto flex items-center space-x-2" >
+                    <Button disabled={input === ""} size="icon" onClick={() => { onSent() }}>
                       <SendHorizontal className="size-4" />
                       <span className="sr-only">Send</span>
                     </Button>
@@ -416,7 +462,7 @@ export default function chat() {
                     </div>
                   ))}
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>
