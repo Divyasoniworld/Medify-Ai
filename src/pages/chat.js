@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import MainNav from "@/components/MainNav";
-import { Camera, Menu, Mic, Pill, Plus, SendHorizontal, Image, MicOff, CircleStop, CircleX, History } from "lucide-react";
+import { Camera, Menu, Mic, Pill, Plus, SendHorizontal, Image, MicOff, CircleStop, CircleX, History, Copy, Volume2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
 import { useContext, useEffect, useState } from "react";
@@ -20,7 +20,7 @@ export default function chat() {
   const { theme, setTheme } = useTheme();
   // const { toast } = useToast();
 
-  const { onSent, recentPrompt, showResult, loading, resultData, setInput, input } = useContext(Context)
+  const { onSent, recentPrompt, showResult, loading, resultData, setInput, input, images, setImages } = useContext(Context)
 
   const handleThemeChange = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -90,104 +90,104 @@ export default function chat() {
     }
   };
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   if (transcript.trim()) {
-  //     setChatMessages([...chatMessages, { role: "user", content: transcript }]);
-  //     setTranscript("");
-  //     setShowCards(false);
-  //   }
-  // };
+  
 
-  // const handleSubmit = async (e) => {
-  //   try {
-  //     e.preventDefault()
-  //     // Create a new message object for the user's input
-  //     const userMessage = { role: 'user', response: transcript };
-
-  //     // Update chat history state to include the user's message
-  //     setChatHistory(prev => [...prev, userMessage]);
-
-  //     // Clear input field after updating state
-  //     setTranscript('');
-  //     setImagePreviews([]);
-
-  //     const result = await axios.post('/api/medifyai', { transcript, imagePreviews });
-  //     const aiResponse = { role: 'AI', response: result.data.response };
-
-  //     // Update chat history state to include the AI's response
-  //     setChatHistory(prev => [...prev, aiResponse]);
-  //   } catch (error) {
-  //     console.error('Error calling API:', error);
-  //     // setResponse('An error occurred while fetching the data.');
-  //   }
-  // };
-
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const userMessage = { role: 'user', message: transcript };
-    setChatHistory(prev => [...prev, userMessage]);
-    setTranscript('');
-
-    const response = await fetch('/api/medifyai', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ transcript }),
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      // alert('Copied to clipboard');
     });
+  };
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
+  const handleSpeak = (text) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
+      console.log('voices', voices)
+      const femaleVoice = voices.find(voice => voice.gender === 'female' && voice.lang.startsWith('en'));
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+      if (femaleVoice) {
+        utterance.voice = femaleVoice;
+      }
 
-      // Decode chunk data
-      const chunk = decoder.decode(value, { stream: true });
+      window.speechSynthesis.speak(utterance);
+  };
 
-      // Update chat history with the current chunk
-      setChatHistory(prev => {
-        const updatedHistory = [...prev];
-        const lastMessage = updatedHistory[updatedHistory.length - 1];
 
-        if (lastMessage && lastMessage.role === 'AI') {
-          lastMessage.message += chunk; // Append the current chunk to the last AI message
-        } else {
-          updatedHistory.push({ role: 'AI', message: chunk }); // Create a new AI message
-        }
-        return updatedHistory;
+  const [imageData, setImageData] = useState([])
+  const [file, setFile] = useState(null);
+  console.log('file', file)
+  const [uploading, setUploading] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState(null);
+
+  console.log('uploadedImage', uploadedImage)
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleUpload = async () => {
+   
+    if (!file) {
+      alert('Please select a file first.');
+      return;
+    }
+
+    setUploading(true);
+
+    const base64File = await toBase64(file);
+console.log('base64File', base64File)
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          file: base64File,
+          fileName: file.name,
+        }),
       });
 
-      console.log('chunk', chunk);
+      const data = await response.json();
+      console.log('data', data)
+      setUploadedImage(data.url);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    } finally {
+      setUploading(false);
     }
   };
 
 
+  const toBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = (error) => reject(error);
+  });
 
 
-  const [imageData, setImageData] = useState([])
+  console.log('imageData------', imageData)
+  console.log('ImagePreviews------', imagePreviews)
 
-
+  
   const handleImageUpload = (e) => {
+    console.log('e.target.files[0]', e.target.files[0])
     const files = Array.from(e.target.files);
 
     // Process each file to create an object with path and mimeType
     const newImagePreviews = files.map((file) => {
-      const path = URL.createObjectURL(file); // Get path (URL) for preview
+      const data = URL.createObjectURL(file); // Get path (URL) for preview
       const mimeType = file.type; // Get mimeType of the file
-
+        // let data = fileToGenerativePart(path,mimeType)
+        // console.log('data', data)
       // Return object with path and mimeType
       return {
-        path,
+        data,
         mimeType,
       };
     });
 
     // Assuming imagePreviews is your state array holding these objects
-    setImagePreviews([...imagePreviews, ...newImagePreviews]);
+    setImages([...images, ...newImagePreviews]);
   };
 
   const handleImageDelete = (index) => {
@@ -207,36 +207,16 @@ export default function chat() {
     }
   }
 
+
+  console.log('images', images)
+
   const historyItems = [
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
     "Chat 2",
     "Chat 3",
     "Chat 4",
     "Chat 5",
   ];
 
-  // Function to render formatted text
-  // const renderFormattedText = (text) => {
-  //   // Replace \n with <br> for line breaks
-  //   const parts = text.split('\n');
-
-  //   return parts.map((part, index) => (
-  //     <React.Fragment key={index}>
-  //       {index > 0 && <br />} {/* Add <br> after each line except the first */}
-  //       {part}
-  //     </React.Fragment>
-  //   ));
-  // };.
 
   const formatText = (text) => {
     // Replace *bold* with <strong>bold</strong>
@@ -344,12 +324,25 @@ export default function chat() {
                         <div className="bg-muted rounded-lg p-3 max-w-[80%]">
                           {
                             typeof chat.message === 'string' && (
-                              <div dangerouslySetInnerHTML={{ __html: chat.message }} />
+                              <div dangerouslySetInnerHTML={formatText(chat.message)} />
                             )
+                          }
+                          {
+                            chat.message == "loading..." ? "" :
+                              (
+                                <div className="flex gap-2 mt-2">
+                                  <Button variant="outline" size="icon"  onClick={() => handleCopy(chat.message)}>
+                                    <Copy className="w-4 h-4" />
+                                  </Button>
+                                  <Button variant="outline" size="icon" onClick={() => handleSpeak(chat.message)}>
+                                    <Volume2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              )
                           }
                         </div>
                       </div>
-                    );
+                    );  
                   }
                 })
               ) : (
@@ -393,7 +386,7 @@ export default function chat() {
                             type="file"
                             accept="image/*"
                             className="hidden"
-                            onChange={handleImageUpload}
+                            onChange={handleFileChange}
                           />
                         </label>
                       </TooltipTrigger>
@@ -441,16 +434,16 @@ export default function chat() {
                     </Tooltip>
                   </TooltipProvider>
                   <div className="ml-auto flex items-center space-x-2" >
-                    <Button disabled={input === ""} size="icon" onClick={() => { onSent() }}>
+                    <Button disabled={input === ""} size="icon" onClick={() => { onSent(), handleUpload() }}>
                       <SendHorizontal className="size-4" />
                       <span className="sr-only">Send</span>
                     </Button>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center p-3 pt-0">
-                  {imagePreviews.map((image, index) => (
+                  {images.map((image, index) => (
                     <div key={index} className="relative mr-2 mb-2">
-                      <img src={image.path} alt={`Preview ${index}`} className="h-16 w-16 rounded-md" />
+                      <img src={image.data} alt={`Preview ${index}`} className="h-16 w-16 rounded-md" />
                       <Button
                         variant="ghost"
                         size="icon"

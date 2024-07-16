@@ -1,5 +1,5 @@
 import axios from "axios";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import Loader from '@/components/Loader'
 
 export const Context = createContext()
@@ -12,6 +12,13 @@ const ContextProvider = (props) => {
     const [showResult, setShowResult] = useState(false)
     const [loading, setLoading] = useState(false);
     const [resultData, setResultData] = useState([])
+    const [history, setHistory] = useState([]);
+    const [images,setImages] = useState([])
+
+    useEffect(() => {
+        const savedHistory = JSON.parse(sessionStorage.getItem('chatHistory')) || [];
+        setHistory(savedHistory);
+      }, []);
 
 const delayPara = (index,nextWord) => {
 setTimeout(function () {
@@ -35,7 +42,13 @@ setTimeout(function () {
         const loadingPlaceholder = { role: "AI", message: "loading..." };
         setResultData((prevResultData) => [...prevResultData, loadingPlaceholder]);
 
-        const response = await axios.post('/api/medifyai', { transcript: input });
+    
+        
+        const response = await axios.post('/api/medifyai', { transcript: input,images:images, history:history });
+        const data = await response.data;
+        const newHistory = data.newHistory;
+        setHistory(newHistory);
+      sessionStorage.setItem('chatHistory', JSON.stringify(newHistory));
 
     
     
@@ -63,7 +76,9 @@ setTimeout(function () {
         loading,
         resultData,
         input,
-        setInput
+        setInput,
+        images,
+        setImages
     }
 
     return (

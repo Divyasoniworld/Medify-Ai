@@ -1,8 +1,16 @@
 // pages/api/medifyAI.js
 
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
-import { Readable } from 'stream';
+import { readFileSync } from "fs";
 
+function fileToGenerativePart(path, mimeType) {
+  return {
+    inlineData: {
+      data: Buffer.from(readFileSync(path)).toString("base64"),
+      mimeType
+    },
+  };
+}
 
 
 export default async function handler(req, res) {
@@ -13,21 +21,42 @@ export default async function handler(req, res) {
   const apiKey = process.env.GEMINI_API_KEY;
   const genAI = new GoogleGenerativeAI(apiKey);
 
-  const safetySetting = [
-    {
-      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-      threshold: HarmBlockThreshold.BLOCK_NONE,
-    },
-    {
-      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-      threshold: HarmBlockThreshold.BLOCK_NONE,
-    },
-    {
-      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-      threshold: HarmBlockThreshold.BLOCK_NONE,
-    }
+  const safetySetting = [ 
+    { 
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT, 
+      threshold: HarmBlockThreshold.BLOCK_NONE, 
+    }, 
+    { 
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, 
+      threshold: HarmBlockThreshold.BLOCK_NONE, 
+    }, 
+    { 
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, 
+      threshold: HarmBlockThreshold.BLOCK_NONE, 
+    }, 
+    { 
+      category: HarmCategory.HARM_CATEGORY_MEDICAL, 
+      threshold: HarmBlockThreshold.BLOCK_NONE 
+    }, 
+    { 
+      category: HarmCategory.HARM_CATEGORY_SEXUAL, 
+      threshold: HarmBlockThreshold.BLOCK_NONE 
+    }, 
+    { 
+      category: HarmCategory.HARM_CATEGORY_DEROGATORY, 
+      threshold: HarmBlockThreshold.BLOCK_NONE 
+    } ,
+    { 
+      category: HarmCategory.HARM_CATEGORY_TOXICITY, 
+      threshold: HarmBlockThreshold.BLOCK_NONE 
+    } ,
+    { 
+      category: HarmCategory.HARM_CATEGORY_VIOLENCE, 
+      threshold: HarmBlockThreshold.BLOCK_NONE 
+    } 
   ];
 
+ 
   const model = genAI.getGenerativeModel({
     model: 'gemini-1.5-pro', 
     safetySetting,
@@ -42,6 +71,9 @@ export default async function handler(req, res) {
   };
 
   try {
+    const { transcript,images, history } = req.body;
+    console.log('process.env.IMAGEKIT_PUBLIC_KEY', process.env.IMAGEKIT_PUBLIC_KEY)
+
     const chatSession = model.startChat({
       generationConfig,
       history: [
@@ -81,17 +113,24 @@ export default async function handler(req, res) {
             { text: "Okay, here's how I'll introduce myself to each new user:\n\nHi there! I'm Eva, your friendly AI assistant. I can help you find information about different health topics. What can I help you learn about today? 😊 \n" },
           ],
         },
+        ...history,
       ],
     });
 
 
+    const imageParts = images.map((image) => fileToGenerativePart(image.data, image.mimeType));
 
-    const { transcript, imagePreviews } = req.body;
+   
 
-    const result = await chatSession.sendMessage(transcript);
+    const result = await chatSession.sendMessage([transcript, ...imageParts]);
 
     const responseText = result.response?.candidates[0]?.content?.parts == undefined ? result.response.text() : result.response.candidates[0].content.parts?.map(part => part.text).join('\n\n')
-    return res.status(200).json({ role: "AI", response: responseText });
+    const newHistory = [
+      ...history,
+      { role: "user", parts: [{ text: transcript }] },
+      { role: "model", parts: [{ text: responseText }] },
+    ];
+    return res.status(200).json({ role: "AI", response: responseText, newHistory });
 
   } catch (error) {
     console.log('error', error)

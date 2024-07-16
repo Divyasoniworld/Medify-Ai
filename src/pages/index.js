@@ -57,6 +57,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 function Home() {
   const router = useRouter()
 
+  
   const handleChatModule = () => {
     router.push("/chat")
   }
