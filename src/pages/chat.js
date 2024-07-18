@@ -93,7 +93,7 @@ export default function chat() {
   
 
   const handleCopy = (text) => {
-    navigator.clipboard.writeText(text).then(() => {
+    navigator.clipboard.writeText(text.trim()).then(() => {
       // alert('Copied to clipboard');
     });
   };
@@ -113,46 +113,40 @@ export default function chat() {
 
 
   const [imageData, setImageData] = useState([])
-  const [file, setFile] = useState(null);
-  console.log('file', file)
   const [uploading, setUploading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
 
-  console.log('uploadedImage', uploadedImage)
-  const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
-  };
+  const [file, setFile] = useState("");
+  const [preview, setPreview] = useState(null);
+  const [fileName, setFileName] = useState('');
 
-  const handleUpload = async () => {
-   
-    if (!file) {
-      alert('Please select a file first.');
-      return;
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
     }
+  };
+  const handleUpload = async () => {
 
-    setUploading(true);
+    if (!file) return;
 
-    const base64File = await toBase64(file);
-console.log('base64File', base64File)
+    const formData = new FormData();
+    formData.append('file', file);
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
+      const response = await axios.post('/api/upload', formData, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
-        body: JSON.stringify({
-          file: base64File,
-          fileName: file.name,
-        }),
       });
 
-      const data = await response.json();
-      console.log('data', data)
-      setUploadedImage(data.url);
+      if (response.data.success) {
+        console.log('response', response.data.fileName)
+        setFileName(response.data.fileName);
+        onSent(response.data?.fileName)
+      }
     } catch (error) {
       console.error('Error uploading file:', error);
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -164,35 +158,11 @@ console.log('base64File', base64File)
     reader.onerror = (error) => reject(error);
   });
 
-
-  console.log('imageData------', imageData)
-  console.log('ImagePreviews------', imagePreviews)
-
   
-  const handleImageUpload = (e) => {
-    console.log('e.target.files[0]', e.target.files[0])
-    const files = Array.from(e.target.files);
 
-    // Process each file to create an object with path and mimeType
-    const newImagePreviews = files.map((file) => {
-      const data = URL.createObjectURL(file); // Get path (URL) for preview
-      const mimeType = file.type; // Get mimeType of the file
-        // let data = fileToGenerativePart(path,mimeType)
-        // console.log('data', data)
-      // Return object with path and mimeType
-      return {
-        data,
-        mimeType,
-      };
-    });
-
-    // Assuming imagePreviews is your state array holding these objects
-    setImages([...images, ...newImagePreviews]);
-  };
 
   const handleImageDelete = (index) => {
-    const updatedImagePreviews = imagePreviews.filter((_, i) => i !== index);
-    setImagePreviews(updatedImagePreviews);
+    setPreview(null);
   };
 
   const handleMicPermition = () => {
@@ -407,7 +377,7 @@ console.log('base64File', base64File)
                             type="file"
                             capture="environment"
                             className="hidden"
-                            onChange={handleImageUpload}
+                            onChange={handleFileChange}
                           />
                         </label>
                       </TooltipTrigger>
@@ -434,26 +404,26 @@ console.log('base64File', base64File)
                     </Tooltip>
                   </TooltipProvider>
                   <div className="ml-auto flex items-center space-x-2" >
-                    <Button disabled={input === ""} size="icon" onClick={() => { onSent(), handleUpload() }}>
+                    <Button disabled={input === ""} size="icon" onClick={() => { file != "" ? handleUpload() :  onSent() }}>
                       <SendHorizontal className="size-4" />
                       <span className="sr-only">Send</span>
                     </Button>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center p-3 pt-0">
-                  {images.map((image, index) => (
-                    <div key={index} className="relative mr-2 mb-2">
-                      <img src={image.data} alt={`Preview ${index}`} className="h-16 w-16 rounded-md" />
+                  {/* {images.map((image, index) => ( */}
+                    <div className="relative mr-2 mb-2">
+                      <img src={preview} alt="Preview" className="h-16 w-16 rounded-md" />
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleImageDelete(index)}
+                        onClick={() => handleImageDelete()}
                         className="cancel_preview absolute top-0 right-7 m-1"
                       >
                         <CircleX className="h-4 w-4" />
                       </Button>
                     </div>
-                  ))}
+                  {/* ))} */}
                 </div>
               </div>
             </div>

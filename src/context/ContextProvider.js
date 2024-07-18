@@ -42,9 +42,14 @@ setTimeout(function () {
         const loadingPlaceholder = { role: "AI", message: "loading..." };
         setResultData((prevResultData) => [...prevResultData, loadingPlaceholder]);
 
+        let response ;
     
-        
-        const response = await axios.post('/api/medifyai', { transcript: input,images:images, history:history });
+    if (prompt != undefined) {
+        response = await axios.post('/api/medifyai', { transcript: input,dataimage:prompt, history:history });
+    }    
+
+    response = await axios.post('/api/medifyai', { transcript: input, history:history });
+
         const data = await response.data;
         const newHistory = data.newHistory;
         setHistory(newHistory);

@@ -1,42 +1,50 @@
 // pages/api/upload.js
-import ImageKit from 'imagekit';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { promisify } from 'util';
 
-// const imagekit = new ImageKit({
-//   publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-//   privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-//   urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
-// });
+// Ensure the root directory exists (although it always exists)
+const rootDir = process.cwd();
 
-// publicKey= "public_g08MB1DLrjzW9Jk2wr0qmRHDKwc=",
-// privateKey= "private_Q1oxuN7db0FjW6w8UNuBfI+a3t0=" ,
-// urlEndpoint= "https://ik.imagekit.io/medifyai" ,
-const imagekit = new ImageKit({
-    publicKey:"public_g08MB1DLrjzW9Jk2wr0qmRHDKwc=",
-    privateKey: "private_Q1oxuN7db0FjW6w8UNuBfI+a3t0=" ,
-    urlEndpoint: "https://ik.imagekit.io/medifyai" ,
-  });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, rootDir);  // Set the destination to the root directory
+  },
+  filename: (req, file, cb) => {
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(7);
+    const fileExtension = path.extname(file.originalname);
+    const newFileName = `${timestamp}-${randomString}${fileExtension}`;
+    cb(null, newFileName);
+  },
+});
 
-console.log('process.env.IMAGEKIT_PUBLIC_KEY', process.env.IMAGEKIT_PUBLIC_KEY)
+const upload = multer({ storage: storage });
 
-export default async (req, res) => {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+const handler = async (req, res) => {
+  const uploadMiddleware = upload.single('file');
 
-  const { file, fileName } = req.body;
-
-  if (!file || !fileName) {
-    return res.status(400).json({ error: 'File and fileName are required' });
-  }
+  const uploadPromise = promisify(uploadMiddleware);
 
   try {
-    const response = await imagekit.upload({
-      file,
-      fileName,
-    });
+    await uploadPromise(req, res);
 
-    return res.status(200).json(response);
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No file uploaded' });
+    }
+
+    res.status(200).json({ success: true, fileName: req.file.filename });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    console.error('Error uploading file:', error);
+    res.status(500).json({ success: false, error: 'Error uploading file' });
   }
 };
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+export default handler;

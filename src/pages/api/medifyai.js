@@ -1,17 +1,8 @@
 // pages/api/medifyAI.js
 
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
-import { readFileSync } from "fs";
-
-function fileToGenerativePart(path, mimeType) {
-  return {
-    inlineData: {
-      data: Buffer.from(readFileSync(path)).toString("base64"),
-      mimeType
-    },
-  };
-}
-
+import fs from "fs";
+import path from "path";
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -56,9 +47,8 @@ export default async function handler(req, res) {
     } 
   ];
 
- 
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-pro', 
+    model: 'gemini-1.5-flash', 
     safetySetting,
   });
 
@@ -71,8 +61,7 @@ export default async function handler(req, res) {
   };
 
   try {
-    const { transcript,images, history } = req.body;
-    console.log('process.env.IMAGEKIT_PUBLIC_KEY', process.env.IMAGEKIT_PUBLIC_KEY)
+    const { transcript, dataimage, history } = req.body;
 
     const chatSession = model.startChat({
       generationConfig,
@@ -117,12 +106,19 @@ export default async function handler(req, res) {
       ],
     });
 
-
-    const imageParts = images.map((image) => fileToGenerativePart(image.data, image.mimeType));
-
-   
-
-    const result = await chatSession.sendMessage([transcript, ...imageParts]);
+    let result;
+    if (dataimage && fs.existsSync(dataimage)) {
+      const imageBuffer = fs.readFileSync(dataimage);
+      const image = {
+        inlineData: {
+          data: Buffer.from(imageBuffer).toString("base64"),
+          mimeType: "image/png",
+        },
+      };
+      result = await chatSession.sendMessage([transcript, image]);
+    } else {
+      result = await chatSession.sendMessage(transcript);
+    }
 
     const responseText = result.response?.candidates[0]?.content?.parts == undefined ? result.response.text() : result.response.candidates[0].content.parts?.map(part => part.text).join('\n\n')
     const newHistory = [
