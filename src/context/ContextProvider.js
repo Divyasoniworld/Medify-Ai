@@ -13,24 +13,25 @@ const ContextProvider = (props) => {
     const [loading, setLoading] = useState(false);
     const [resultData, setResultData] = useState([])
     const [history, setHistory] = useState([]);
-    const [images,setImages] = useState([])
+    const [images, setImages] = useState([])
 
     useEffect(() => {
         const savedHistory = JSON.parse(sessionStorage.getItem('chatHistory')) || [];
         setHistory(savedHistory);
-      }, []);
+    }, []);
 
-const delayPara = (index,nextWord) => {
-setTimeout(function () {
-    setResultData((prevResultData) => {
-        const updatedData = [...prevResultData];
-        updatedData[updatedData.length - 1] = prevResultData + nextWord;
-        return updatedData;
-    });
-},75*index)
-}
+    const delayPara = (index, nextWord) => {
+        setTimeout(function () {
+            setResultData((prevResultData) => {
+                const updatedData = [...prevResultData];
+                updatedData[updatedData.length - 1] = prevResultData + nextWord;
+                return updatedData;
+            });
+        }, 75 * index)
+    }
 
     const onSent = async (prompt) => {
+        console.log('prompt', prompt)
         setLoading(true)
         // setResultData("")
         const userMessage = { role: "user", message: input };
@@ -42,21 +43,22 @@ setTimeout(function () {
         const loadingPlaceholder = { role: "AI", message: "loading..." };
         setResultData((prevResultData) => [...prevResultData, loadingPlaceholder]);
 
-        let response ;
-    
-    if (prompt != undefined) {
-        response = await axios.post('/api/medifyai', { transcript: input,dataimage:prompt, history:history });
-    }    
+        let response;
 
-    response = await axios.post('/api/medifyai', { transcript: input, history:history });
+        if (prompt != undefined) {
+            response = await axios.post('/api/medifyai', { transcript: input, dataimage: prompt, history: history });
+        } else {
+            response = await axios.post('/api/medifyai', { transcript: input, history: history });
+        }
+
 
         const data = await response.data;
         const newHistory = data.newHistory;
         setHistory(newHistory);
-      sessionStorage.setItem('chatHistory', JSON.stringify(newHistory));
+        sessionStorage.setItem('chatHistory', JSON.stringify(newHistory));
 
-    
-    
+
+
         const aiResponse = { role: "AI", message: response.data?.response };
 
         // Replace the loading placeholder with the actual AI response

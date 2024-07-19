@@ -108,6 +108,7 @@ export default async function handler(req, res) {
 
     let result;
     if (dataimage && fs.existsSync(dataimage)) {
+      console.log("first")
       const imageBuffer = fs.readFileSync(dataimage);
       const image = {
         inlineData: {
@@ -117,6 +118,7 @@ export default async function handler(req, res) {
       };
       result = await chatSession.sendMessage([transcript, image]);
     } else {
+      console.log("second")
       result = await chatSession.sendMessage(transcript);
     }
 

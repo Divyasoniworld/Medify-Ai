@@ -14,11 +14,12 @@ import axios from "axios";
 import Cards from "@/components/Cards";
 import { Context } from "@/context/ContextProvider";
 import Loader from "@/components/Loader";
+import { useToast } from "@/context/ToastProvider"
 
 export default function chat() {
 
   const { theme, setTheme } = useTheme();
-  // const { toast } = useToast();
+  const { toast } = useToast();
 
   const { onSent, recentPrompt, showResult, loading, resultData, setInput, input, images, setImages } = useContext(Context)
 
@@ -90,7 +91,7 @@ export default function chat() {
     }
   };
 
-  
+
 
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text.trim()).then(() => {
@@ -100,15 +101,15 @@ export default function chat() {
 
   const handleSpeak = (text) => {
     const utterance = new SpeechSynthesisUtterance(text);
-      const voices = window.speechSynthesis.getVoices();
-      console.log('voices', voices)
-      const femaleVoice = voices.find(voice => voice.gender === 'female' && voice.lang.startsWith('en'));
+    const voices = window.speechSynthesis.getVoices();
+    console.log('voices', voices)
+    const femaleVoice = voices.find(voice => voice.gender === 'female' && voice.lang.startsWith('en'));
 
-      if (femaleVoice) {
-        utterance.voice = femaleVoice;
-      }
+    if (femaleVoice) {
+      utterance.voice = femaleVoice;
+    }
 
-      window.speechSynthesis.speak(utterance);
+    window.speechSynthesis.speak(utterance);
   };
 
 
@@ -117,7 +118,7 @@ export default function chat() {
   const [uploadedImage, setUploadedImage] = useState(null);
 
   const [file, setFile] = useState("");
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState("");
   const [fileName, setFileName] = useState('');
 
   const handleFileChange = (e) => {
@@ -151,18 +152,8 @@ export default function chat() {
   };
 
 
-  const toBase64 = (file) => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = (error) => reject(error);
-  });
-
-  
-
-
   const handleImageDelete = (index) => {
-    setPreview(null);
+    setPreview("");
   };
 
   const handleMicPermition = () => {
@@ -301,7 +292,7 @@ export default function chat() {
                             chat.message == "loading..." ? "" :
                               (
                                 <div className="flex gap-2 mt-2">
-                                  <Button variant="outline" size="icon"  onClick={() => handleCopy(chat.message)}>
+                                  <Button variant="outline" size="icon" onClick={() => handleCopy(chat.message)}>
                                     <Copy className="w-4 h-4" />
                                   </Button>
                                   <Button variant="outline" size="icon" onClick={() => handleSpeak(chat.message)}>
@@ -312,7 +303,7 @@ export default function chat() {
                           }
                         </div>
                       </div>
-                    );  
+                    );
                   }
                 })
               ) : (
@@ -404,7 +395,7 @@ export default function chat() {
                     </Tooltip>
                   </TooltipProvider>
                   <div className="ml-auto flex items-center space-x-2" >
-                    <Button disabled={input === ""} size="icon" onClick={() => { file != "" ? handleUpload() :  onSent() }}>
+                    <Button disabled={input === ""} size="icon" onClick={() => { preview != "" ? handleUpload() : onSent(), setPreview("") }}>
                       <SendHorizontal className="size-4" />
                       <span className="sr-only">Send</span>
                     </Button>
@@ -412,17 +403,20 @@ export default function chat() {
                 </div>
                 <div className="flex flex-wrap items-center p-3 pt-0">
                   {/* {images.map((image, index) => ( */}
-                    <div className="relative mr-2 mb-2">
-                      <img src={preview} alt="Preview" className="h-16 w-16 rounded-md" />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleImageDelete()}
-                        className="cancel_preview absolute top-0 right-7 m-1"
-                      >
-                        <CircleX className="h-4 w-4" />
-                      </Button>
-                    </div>
+                  <div className="relative mr-2 mb-2">
+                    {
+                      preview != "" ? <img src={preview} alt="Preview" className="h-16 w-16 rounded-md" /> : ""
+                    }
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleImageDelete()}
+                      className="cancel_preview absolute top-0 right-7 m-1"
+                    >
+                      <CircleX className="h-4 w-4" />
+                    </Button>
+                  </div>
                   {/* ))} */}
                 </div>
               </div>
@@ -431,68 +425,5 @@ export default function chat() {
         </div>
       </div>
     </div>
-  )
-}
-
-function LineChartIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 3v18h18" />
-      <path d="m19 9-5 5-4-4-3 3" />
-    </svg>
-  )
-}
-
-
-function SettingsIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  )
-}
-
-function UsersIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
   )
 }

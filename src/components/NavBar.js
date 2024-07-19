@@ -7,12 +7,23 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Link from "next/link"
 import { CircleUser, Menu, MessageSquareText, Moon, Package2, Pi, Pill, Search, Sun } from 'lucide-react'
 import { Button } from './ui/button'
 import { useTheme } from 'next-themes'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { FcGoogle } from "react-icons/fc";
 
 
 const NavBar = () => {
@@ -65,14 +76,14 @@ const NavBar = () => {
                             className="flex items-center gap-2 text-lg font-semibold"
                         >
                             <Pill className="h-6 w-6" />
-                        <Link href="" className="text-foreground text-2xl font-bold transition-colors hover:text-foreground">
-                            Medify<span className='text-[#595bcc]'>AI</span>
-                        </Link>
+                            <Link href="" className="text-foreground text-2xl font-bold transition-colors hover:text-foreground">
+                                Medify<span className='text-[#595bcc]'>AI</span>
+                            </Link>
                         </Link>
 
                         <Link href="/faq" className="text-foreground hover:text-foreground ml-2">
                             <div className='flex items-center  text-base'>
-                            <MessageSquareText className='size-4 mr-2'/>
+                                <MessageSquareText className='size-4 mr-2' />
                                 Faq's
                             </div>
                         </Link>
@@ -94,8 +105,28 @@ const NavBar = () => {
                     <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                     <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                     <span className="sr-only">Toggle theme</span>
-                </Button> 
-                <Button className="rounded-3xl bg-[#595bcc] text-white hover:bg-[#565dcf] ">sign in</Button>
+                </Button>
+
+                <Dialog>
+                    <DialogTrigger><Button className="rounded-3xl bg-[#595bcc] text-white hover:bg-[#565dcf] ">sign in</Button></DialogTrigger>
+                    <DialogContent>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Sign In with Google</DialogTitle>
+                                <DialogDescription>
+                                    Or sign in with other methods (coming soon!)
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <Button className="gap-3" variant="outline" type="submit"><FcGoogle size={20} /> Login with Google</Button>
+                            </div>
+
+                        </DialogContent>
+                    </DialogContent>
+                </Dialog>
+
+
+
                 {/* <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="secondary" size="icon" className="rounded-full">
