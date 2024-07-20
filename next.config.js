@@ -1,10 +1,4 @@
-/** @type {import('next').NextConfig} */
-// const nextConfig = {
-//   reactStrictMode: true,
-// }
-
 const webpack = require('webpack');
-
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
@@ -12,16 +6,13 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 module.exports = withBundleAnalyzer({
   // reactStrictMode: true,
 
-  
   eslint: {
     // Warning: This might suppress other linting errors as well
     ignoreDuringBuilds: true,
   },
-  
+
   webpack: (config, { dev, isServer }) => {
-
     // Add the ProvidePlugin configuration
-
     config.plugins.push(
       new webpack.ProvidePlugin({
         $: 'jquery',
@@ -42,13 +33,11 @@ module.exports = withBundleAnalyzer({
       });
     }
 
-   
-
     // Important: return the modified config
     return config;
   },
 
-  output: 'export',
+  // Remove the `output: 'export'` line to enable API routes
   images: {
     unoptimized: true,
   },
@@ -65,8 +54,4 @@ module.exports = withBundleAnalyzer({
   },
 
   distDir: 'custom_build',  // Custom output directory for the build
-
-
 });
-
-
