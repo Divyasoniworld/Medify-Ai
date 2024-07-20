@@ -1,22 +1,32 @@
-import webpack from 'webpack';
-import withBundleAnalyzer from '@next/bundle-analyzer';
-
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
+// const nextConfig = {
+//   reactStrictMode: true,
+// }
+
+const webpack = require('webpack');
+
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+module.exports = withBundleAnalyzer({
+  // reactStrictMode: true,
+
 
   eslint: {
     // Warning: This might suppress other linting errors as well
     ignoreDuringBuilds: true,
   },
-
+  
   webpack: (config, { dev, isServer }) => {
+
     // Add the ProvidePlugin configuration
+
     config.plugins.push(
       new webpack.ProvidePlugin({
         $: 'jquery',
         jQuery: 'jquery',
-        'window.jQuery': 'jquery',
+        'window.jQuery': 'jquery'
       })
     );
 
@@ -31,6 +41,8 @@ const nextConfig = {
         },
       });
     }
+
+   
 
     // Important: return the modified config
     return config;
@@ -47,12 +59,14 @@ const nextConfig = {
   ) {
     return {
       '/': { page: '/' },
-      '/chat': { page: '/chat' }
-    };
+      '/chat': { page: '/chat' },
+      '/faq': { page: '/faq' },
+    }
   },
 
-};
+  distDir: 'custom_build',  // Custom output directory for the build
 
-export default withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-})(nextConfig);
+
+});
+
+
