@@ -12,7 +12,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 module.exports = withBundleAnalyzer({
   // reactStrictMode: true,
 
-
+  
   eslint: {
     // Warning: This might suppress other linting errors as well
     ignoreDuringBuilds: true,
@@ -48,7 +48,7 @@ module.exports = withBundleAnalyzer({
     return config;
   },
 
-  // output: 'export',
+  output: 'export',
   images: {
     unoptimized: true,
   },
