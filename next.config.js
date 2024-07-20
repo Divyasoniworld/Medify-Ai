@@ -4,15 +4,11 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 module.exports = withBundleAnalyzer({
-  // reactStrictMode: true,
-
   eslint: {
-    // Warning: This might suppress other linting errors as well
     ignoreDuringBuilds: true,
   },
 
   webpack: (config, { dev, isServer }) => {
-    // Add the ProvidePlugin configuration
     config.plugins.push(
       new webpack.ProvidePlugin({
         $: 'jquery',
@@ -33,25 +29,12 @@ module.exports = withBundleAnalyzer({
       });
     }
 
-    // Important: return the modified config
     return config;
   },
 
-  // Remove the `output: 'export'` line to enable API routes
   images: {
     unoptimized: true,
   },
 
-  exportPathMap: async function (
-    defaultPathMap,
-    { dev, dir, outDir, distDir, buildId }
-  ) {
-    return {
-      '/': { page: '/' },
-      '/chat': { page: '/chat' },
-      '/faq': { page: '/faq' },
-    }
-  },
-
-  distDir: 'custom_build',  // Custom output directory for the build
+  distDir: 'custom_build',
 });
