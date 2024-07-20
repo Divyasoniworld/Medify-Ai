@@ -7,6 +7,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+  } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Link from "next/link"
@@ -19,15 +24,29 @@ import { useTheme } from 'next-themes'
 import { useRouter } from 'next/router'
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth"
+import app from '../../firebaseConfig'
+import { useAuth } from '@/context/AuthContext'
 
 const MainNav = () => {
 
     const { theme, setTheme } = useTheme();
+    const { user, setUser, login, logout } = useAuth();
     const router = useRouter()
 
     const handleThemeChange = () => {
         setTheme(theme === 'dark' ? 'light' : 'dark');
     };
+
+    const handleLogout = async () => {
+        try {
+            const auth = getAuth(app)
+            await signOut(auth)
+            router.push("/")
+        } catch (error) {
+            console.log("signout error", error)
+        }
+    }
 
     const historyItems = [
         "Please provide information about this pills",
@@ -106,6 +125,10 @@ const MainNav = () => {
                     <DropdownMenuTrigger asChild>
                         <Button variant="secondary" size="icon" className="rounded-full">
                             <CircleUser className="h-5 w-5" />
+                            <Avatar>
+                                <AvatarImage src={user?.photoURL} alt="profile" />
+                                <AvatarFallback>{}</AvatarFallback>
+                            </Avatar>
                             <span className="sr-only">Toggle user menu</span>
                         </Button>
                     </DropdownMenuTrigger>
@@ -114,7 +137,7 @@ const MainNav = () => {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>Settings</DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => { router.push("/") }}>Logout</DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

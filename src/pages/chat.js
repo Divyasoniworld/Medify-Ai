@@ -15,11 +15,32 @@ import Cards from "@/components/Cards";
 import { Context } from "@/context/ContextProvider";
 import Loader from "@/components/Loader";
 import { useToast } from "@/context/ToastProvider"
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth"
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/router";
 
 export default function chat() {
 
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+
+  const auth = getAuth()
+  const router = useRouter()
+  const { user, setUser, login, logout } = useAuth();
+
+  useEffect(()=>{
+ const unsubscribe = onAuthStateChanged(auth, (user)=>{
+  if (user) {
+    setUser(user)
+  }else{
+    router.push("/")
+  }
+ })
+
+ return () => unsubscribe()
+
+  },[auth, router])
+  
 
   const { onSent, recentPrompt, showResult, loading, resultData, setInput, input, images, setImages } = useContext(Context)
 
@@ -222,19 +243,6 @@ export default function chat() {
                       <Plus className='mr-2 size-4 ' />New Chat
                     </Button>
                   </Link>
-                  <Link href="#" className="text-foreground hover:text-foreground ml-2">
-                    <div className="flex items-center text-base">
-                      <History className="size-4 mr-2" />
-                      History
-                    </div>
-                  </Link>
-                  <ScrollArea className="chat-history mt-2">
-                    {historyItems.map((item, index) => (
-                      <Link key={index} href="#" className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted-background">
-                        {item}
-                      </Link>
-                    ))}
-                  </ScrollArea>
                 </nav>
               </SheetContent>
             </Sheet>
@@ -270,7 +278,7 @@ export default function chat() {
                           <p className="text-sm">{chat.message}</p>
                         </div>
                         <Avatar className="w-8 h-8">
-                          <AvatarImage src="/placeholder-user.jpg" />
+                          <AvatarImage src={user?.photoURL} alt="profile" />
                           <AvatarFallback>Me</AvatarFallback>
                         </Avatar>
                       </div>
