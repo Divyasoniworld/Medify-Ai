@@ -51,7 +51,6 @@ const nextConfig = {
     };
   },
 
-  distDir: 'custom_build', // Custom output directory for the build
 };
 
 export default withBundleAnalyzer({
