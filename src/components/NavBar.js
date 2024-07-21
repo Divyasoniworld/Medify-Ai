@@ -29,10 +29,12 @@ import { getAuth } from "firebase/auth"
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth"
 import app from '../../firebaseConfig.js'
 import { useRouter } from 'next/router'
+import { useDialog } from '@/context/DialogContext';
 
 const NavBar = () => {
 
     const { theme, setTheme } = useTheme();
+    const { isDialogOpen, openDialog, closeDialog } = useDialog();
     const router = useRouter()
 
     const handleThemeChange = () => {
@@ -59,6 +61,7 @@ const NavBar = () => {
         const provider = new GoogleAuthProvider();
         try {
             let { user } = await signInWithPopup(auth, provider);
+            closeDialog()
             router.push(`/chat?auth=${user?.accessToken}`)
         } catch (error) {
             console.log("google sign in error", error)
@@ -137,9 +140,11 @@ const NavBar = () => {
                     <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                     <span className="sr-only">Toggle theme</span>
                 </Button>
+                        <Button className="rounded-3xl bg-[#595bcc] text-white hover:bg-[#565dcf]" onClick={openDialog}>sign in</Button>
 
-                <Dialog>
-                    <DialogTrigger><Button className="rounded-3xl bg-[#595bcc] text-white hover:bg-[#565dcf] ">sign in</Button></DialogTrigger>
+                <Dialog open={isDialogOpen} onOpenChange={closeDialog}>
+                    <DialogTrigger asChild>
+                    </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Sign In with Google</DialogTitle>
@@ -155,24 +160,22 @@ const NavBar = () => {
                     </DialogContent>
                 </Dialog>
 
+                {/* <Dialog>
+                    <DialogTrigger><Button className="rounded-3xl bg-[#595bcc] text-white hover:bg-[#565dcf] ">sign in</Button></DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Sign In with Google</DialogTitle>
+                            <DialogDescription>
+                                Or sign in with other methods (coming soon!)
+                            </DialogDescription>
+                        </DialogHeader>
 
+                        <div className="grid gap-4 py-4">
+                            <Button className="gap-3" variant="outline" type="submit" onClick={signInWithGoogle}><FcGoogle size={20} /> Login with Google</Button>
+                        </div>
 
-                {/* <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="secondary" size="icon" className="rounded-full">
-                            <CircleUser className="h-5 w-5" />
-                            <span className="sr-only">Toggle user menu</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Settings</DropdownMenuItem>
-                        <DropdownMenuItem>Support</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Logout</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu> */}
+                    </DialogContent>
+                </Dialog> */}
             </div>
         </header>
     )

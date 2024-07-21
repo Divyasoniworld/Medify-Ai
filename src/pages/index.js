@@ -53,14 +53,16 @@ import NavBar from "@/components/NavBar"
 import Image from "next/image"
 import { useRouter } from "next/router"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useDialog } from '@/context/DialogContext';
 
 function Home() {
   const router = useRouter()
 
-  
-  const handleChatModule = () => {
-    router.push("/chat")
-  }
+  const { openDialog } = useDialog();
+
+  // const handleChatModule = () => {
+  //   router.push("/chat")
+  // }
 
   const historyItems = [
     "Please provide information about this pills",
@@ -159,7 +161,7 @@ function Home() {
                   Know your meds, simplify your health
                 </CardDescription>
                 <div className="flex justify-center mt-10 items-center">
-                  <Button onClick={handleChatModule} className="rounded-3xl bg-[#595bcc] text-white hover:bg-[#565dcf]">Chat Now</Button>
+                  <Button onClick={openDialog} className="rounded-3xl bg-[#595bcc] text-white hover:bg-[#565dcf]">Chat Now</Button>
                 </div>
               </CardContent>
             </Card>

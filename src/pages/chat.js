@@ -7,7 +7,7 @@ import MainNav from "@/components/MainNav";
 import { Camera, Menu, Mic, Pill, Plus, SendHorizontal, Image, MicOff, CircleStop, CircleX, History, Copy, Volume2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import axios from "axios";
@@ -22,31 +22,36 @@ import { useRouter } from "next/router";
 export default function chat() {
 
   const { theme, setTheme } = useTheme();
-  const { toast } = useToast();
-
+  const chatContainerRef = useRef(null);
   const auth = getAuth()
   const router = useRouter()
   const { user, setUser, login, logout } = useAuth();
 
-  useEffect(()=>{
- const unsubscribe = onAuthStateChanged(auth, (user)=>{
-  if (user) {
-    setUser(user)
-  }else{
-    router.push("/")
-  }
- })
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user)
+      } else {
+        router.push("/")
+      }
+    })
 
- return () => unsubscribe()
+    return () => unsubscribe()
 
-  },[auth, router])
-  
+  }, [auth, router])
+
 
   const { onSent, recentPrompt, showResult, loading, resultData, setInput, input, images, setImages } = useContext(Context)
 
   const handleThemeChange = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [resultData]);
 
   const [transcript, setTranscript] = useState("");
   const [prompt, setPrompt] = useState("");
@@ -116,7 +121,6 @@ export default function chat() {
 
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text.trim()).then(() => {
-      // alert('Copied to clipboard');
     });
   };
 
@@ -124,11 +128,11 @@ export default function chat() {
     const utterance = new SpeechSynthesisUtterance(text);
     const voices = window.speechSynthesis.getVoices();
     console.log('voices', voices)
-    const femaleVoice = voices.find(voice => voice.gender === 'female' && voice.lang.startsWith('en'));
+    // const femaleVoice = voices.find(voice => voice.gender === 'female' && voice.lang.startsWith('en'));
 
-    if (femaleVoice) {
-      utterance.voice = femaleVoice;
-    }
+    // if (femaleVoice) {
+    //   utterance.voice = femaleVoice;
+    // }
 
     window.speechSynthesis.speak(utterance);
   };
@@ -219,6 +223,9 @@ export default function chat() {
     return { __html: text };
   };
 
+  const handleNewChat = () => {
+    
+  }
   return (
     <div className="flex flex-col h-screen bg-background">
       <div className="flex">
@@ -239,7 +246,7 @@ export default function chat() {
                     </span>
                   </Link>
                   <Link href="#" className="text-muted-foreground hover:text-foreground mt-3">
-                    <Button variant="secondary" onClick={() => { alert("hello") }}>
+                    <Button variant="secondary" onClick={handleNewChat}>
                       <Plus className='mr-2 size-4 ' />New Chat
                     </Button>
                   </Link>
@@ -247,11 +254,11 @@ export default function chat() {
               </SheetContent>
             </Sheet>
           </nav>
-         
+
         </aside>
         <div className="main-chat-div flex-1 flex flex-col">
           <MainNav />
-          <div className="flex-1 overflow-auto pt-16 p-4">
+          <div className="flex-1 overflow-auto pt-16 p-4" ref={chatContainerRef}>
             <div className="grid gap-4">
               {showResult ? (
                 resultData.map((chat, index) => {
@@ -277,7 +284,7 @@ export default function chat() {
                         <div className="bg-muted rounded-lg p-3 max-w-[80%]">
                           {
                             typeof chat.message === 'string' && (
-                              <div dangerouslySetInnerHTML={formatText(chat.message)} />
+                              <div dangerouslySetInnerHTML={formatText(chat.message?.trim())} />
                             )
                           }
                           {

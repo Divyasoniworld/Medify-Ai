@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import {
     Card,
     CardContent,
@@ -7,25 +7,37 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { Activity, CreditCard, DollarSign, Users } from 'lucide-react'
+import { Context } from "@/context/ContextProvider";
+
+const cardsNames = [
+    {
+        value: "What is Paracetamol and what is it used for?"
+    },
+    {
+        value: "How does Ibuprofen work and when should I take it?"
+    },
+    {
+        value: "What are the uses and side effects of Aspirin?"
+    }
+]
 
 const Cards = () => {
+
+    const { setInput } = useContext(Context)
+
     return (
         <div className="grid gap-6 mt-10 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
-            <Card className="xl:col-span-1">
-                <CardHeader>
-                    <CardTitle className="text-md">What is Paracetamol and what is it used for?</CardTitle>
-                </CardHeader>
-            </Card>
-            <Card className="xl:col-span-1">
-                <CardHeader>
-                    <CardTitle className="text-md">How does Ibuprofen work and when should I take it?</CardTitle>
-                </CardHeader>
-            </Card>
-            <Card className="xl:col-span-1">
-                <CardHeader>
-                    <CardTitle className="text-md">What are the uses and side effects of Aspirin?</CardTitle>
-                </CardHeader>
-            </Card>
+            {
+                cardsNames.map((card, index) => {
+                    return (
+                        <Card className="xl:col-span-1">
+                            <CardHeader>
+                                <CardTitle className="text-md cursor-pointer" onClick={()=>{setInput(card?.value)}} >{card?.value}</CardTitle>
+                            </CardHeader>
+                        </Card>
+                    )
+                })
+            }
         </div>
     )
 }

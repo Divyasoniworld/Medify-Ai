@@ -4,11 +4,10 @@ import "@/styles/globals.css";
 import Head from "next/document";
 import ContextProvider from '@/context/ContextProvider'
 // import { Toaster } from "@/components/ui/toaster"
-import { AnimatePresence } from 'framer-motion';
-import Layout from '@/components/Layout'
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { AuthProvider } from '@/context/AuthContext';
+import { DialogProvider } from '@/context/DialogContext';
 
 export default function App({ Component, pageProps }) {
 
@@ -17,11 +16,13 @@ export default function App({ Component, pageProps }) {
       <title>Medify AI</title>
       <AuthProvider>
         <ContextProvider>
-          <ThemeProvider>
-            <ToastProvider>
+          <DialogProvider>
+            <ThemeProvider>
+              <ToastProvider>
                 <Component {...pageProps} />
-            </ToastProvider>
-          </ThemeProvider>
+              </ToastProvider>
+            </ThemeProvider>
+          </DialogProvider>
         </ContextProvider>
       </AuthProvider>
     </>
