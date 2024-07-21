@@ -404,6 +404,15 @@ top: 500px;
   transition: opacity 300ms ease-in;
 }
 
+.card-effect{
+/* From https://css.glass */
+background: rgba(201, 188, 188, 0.2);
+border-radius: 16px;
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(14.7px);
+-webkit-backdrop-filter: blur(14.7px);
+}
+
 
 
   

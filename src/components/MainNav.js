@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -27,11 +27,18 @@ import { Separator } from "@/components/ui/separator"
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth"
 import app from '../../firebaseConfig'
 import { useAuth } from '@/context/AuthContext'
+import { Context } from "@/context/ContextProvider";
 
 const MainNav = () => {
 
     const { theme, setTheme } = useTheme();
     const { user, setUser, login, logout } = useAuth();
+    const { setInput, setResultData,setShowResult } = useContext(Context)
+
+    
+
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
     const router = useRouter()
 
     const handleThemeChange = () => {
@@ -48,31 +55,23 @@ const MainNav = () => {
         }
     }
 
-    const historyItems = [
-        "Please provide information about this pills",
-        "Please provide information about this pills",
-        "Please provide information about this pills",
-        "Please provide information about this pills",
-        "Please provide information about this pills",
-        "Please provide information about this pills",
-        "Please provide information about this pills",
-        "Please provide information about this pills",
-        "Please provide information about this pills",
-        "Please provide information about this pills",
-        "Please provide information about this pills",
-        "Chat 2",
-        "Chat 3",
-        "Chat 4",
-        "Chat 5",
-    ];
+    const handleNewChat = () => {
+        setShowResult(false)
+        setResultData([])
+        sessionStorage.removeItem("chatHistory");
+        setInput(""); // Clear the chat input
+        setIsSidebarOpen(false); // Close the sidebar
+    };
+
+
     return (
-        <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+        <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-50">
             <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
                 <Link href="" className="text-foreground text-2xl font-bold transition-colors hover:text-foreground">
                     Medify<span className='text-[#595bcc]'>AI</span>
                 </Link>
             </nav>
-            <Sheet>
+            <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                 <SheetTrigger asChild>
                     <Button variant="outline" size="icon" className="shrink-0 md:hidden">
                         <Menu className="h-5 w-5" />
@@ -91,23 +90,8 @@ const MainNav = () => {
                             </Link>
                         </Link>
                         <Link href="" className="text-muted-foreground hover:text-foreground mt-3">
-                            <Button variant="secondary" onClick={() => { alert("hello") }}><Plus className='mr-2 size-4 ' />New Chat</Button>
+                            <Button variant="secondary" onClick={handleNewChat}><Plus className='mr-2 size-4 ' />New Chat</Button>
                         </Link>
-
-                        <Link href="" className="text-foreground hover:text-foreground ml-2">
-                            <div className="flex items-center text-base">
-                                <History className="size-4 mr-2" />
-                                History
-                            </div>
-                        </Link>
-
-                        <ScrollArea className="chat-history mt-2">
-                            {historyItems.map((item, index) => (
-                                <Link key={index} href="#" className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted-background">
-                                    {item}
-                                </Link>
-                            ))}
-                        </ScrollArea>
                     </nav>
                 </SheetContent>
             </Sheet>

@@ -54,32 +54,35 @@ import Image from "next/image"
 import { useRouter } from "next/router"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useDialog } from '@/context/DialogContext';
+import { useAuth } from "@/context/AuthContext"
+import { getAuth } from "firebase/auth"
+import { useEffect } from "react"
+import app from '../../firebaseConfig'
 
 function Home() {
   const router = useRouter()
 
   const { openDialog } = useDialog();
 
-  // const handleChatModule = () => {
-  //   router.push("/chat")
-  // }
+  const handleChatModule = () => {
+    router.push("/chat")
+  }
 
-  const historyItems = [
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Please provide information about this pills",
-    "Chat 2",
-    "Chat 3",
-    "Chat 4",
-    "Chat 5",
-  ];
+  const { user, setUser, login, logout } = useAuth();
+
+  useEffect(() => {
+    const auth = getAuth(app);
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+        if (user) {
+            setUser(user)
+            router.push("/chat")
+        } else {
+            setUser(null)
+        }
+    })
+
+    return () => unsubscribe();
+}, [])
 
   return (
     <div className="flex min-h-screen w-full flex-col md:flex-row">

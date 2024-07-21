@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import MainNav from "@/components/MainNav";
-import { Camera, Menu, Mic, Pill, Plus, SendHorizontal, Image, MicOff, CircleStop, CircleX, History, Copy, Volume2 } from "lucide-react";
+import { Camera, Menu, Mic, Pill, Plus, SendHorizontal, Image, MicOff, CircleStop, CircleX, History, Copy, Volume2, Pause } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -26,22 +26,22 @@ export default function chat() {
   const auth = getAuth()
   const router = useRouter()
   const { user, setUser, login, logout } = useAuth();
+  const showToast = useToast()
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       setUser(user)
+  //     } else {
+  //       router.push("/")
+  //     }
+  //   })
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user)
-      } else {
-        router.push("/")
-      }
-    })
+  //   return () => unsubscribe()
 
-    return () => unsubscribe()
-
-  }, [auth, router])
+  // }, [auth, router])
 
 
-  const { onSent, recentPrompt, showResult, loading, resultData, setInput, input, images, setImages } = useContext(Context)
+  const { onSent, recentPrompt, showResult, setShowResult, loading, resultData, setResultData, setInput, input, images, setImages } = useContext(Context)
 
   const handleThemeChange = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -58,6 +58,7 @@ export default function chat() {
   const [recognition, setRecognition] = useState(null);
   const [permission, setPermission] = useState(null);
   const [isListening, setIsListening] = useState(false);
+  console.log('isListening', isListening)
   const [imagePreviews, setImagePreviews] = useState([]);
   // const [chatMessages, setChatMessages] = useState(chatData);
   const [showCards, setShowCards] = useState(true);
@@ -71,22 +72,22 @@ export default function chat() {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("SpeechRecognition API is not supported in this browser.");
+      alert('SpeechRecognition API is not supported in this browser.');
       return;
     }
 
     const recognitionInstance = new SpeechRecognition();
     recognitionInstance.continuous = false;
     recognitionInstance.interimResults = false;
-    recognitionInstance.lang = "en-USA";
+    recognitionInstance.lang = 'en-USA';
 
     recognitionInstance.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
-      setTranscript(transcript);
+      setInput(transcript);
     };
 
     recognitionInstance.onerror = (event) => {
-      console.error("Speech recognition error", event.error);
+      console.error('Speech recognition error', event.error);
     };
 
     recognitionInstance.onend = () => {
@@ -95,24 +96,24 @@ export default function chat() {
 
     setRecognition(recognitionInstance);
 
-    navigator.permissions.query({ name: "microphone" }).then((permissionStatus) => {
+    navigator.permissions.query({ name: 'microphone' }).then((permissionStatus) => {
       setPermission(permissionStatus.state);
       permissionStatus.onchange = () => {
         setPermission(permissionStatus.state);
       };
     });
-  }, []);
+  }, [setInput]);
 
   const startRecognition = () => {
-    if (recognition) {
+    if (recognition && !isListening) {
       recognition.start();
       setIsListening(true);
     }
   };
 
   const stopRecognition = () => {
-    if (recognition) {
-      recognition.stop();
+    if (recognition && isListening) {
+      recognition.stop();  // Use stop instead of onend to properly stop recognition
       setIsListening(false);
     }
   };
@@ -120,27 +121,72 @@ export default function chat() {
 
 
   const handleCopy = (text) => {
-    navigator.clipboard.writeText(text.trim()).then(() => {
+    navigator.clipboard?.writeText(text.trim()).then(() => {
     });
   };
 
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [utterance, setUtterance] = useState(null);
+
   const handleSpeak = (text) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    console.log('voices', voices)
-    // const femaleVoice = voices.find(voice => voice.gender === 'female' && voice.lang.startsWith('en'));
+    if (isSpeaking) {
+      // Stop the current speech
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
 
-    // if (femaleVoice) {
-    //   utterance.voice = femaleVoice;
-    // }
+    // Simplified regex to remove emojis
+    const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{1FB00}-\u{1FBFF}\u{1FC00}-\u{1FFFF}\u{2000}-\u{2BFF}\u{A700}-\u{A71F}\u{FE00}-\u{FE0F}\u{E0100}-\u{E01EF}]/gu;
 
-    window.speechSynthesis.speak(utterance);
+    // Remove emojis from the text
+    const cleanText = text.replace(emojiRegex, '');
+
+    // Create SpeechSynthesisUtterance
+    const newUtterance = new SpeechSynthesisUtterance(cleanText);
+
+    // Fetch voices and select a female voice
+    let voices = window.speechSynthesis.getVoices();
+    let femaleVoice = voices.find(voice => voice.name.includes('Female') || voice.name.includes('Google UK English Female'));
+
+    if (!femaleVoice) {
+      femaleVoice = voices.find(voice => voice.lang === 'en-US'); // Fallback to a default English voice if no specific female voice found
+    }
+
+    newUtterance.voice = femaleVoice;
+    newUtterance.lang = 'en-US';
+    newUtterance.pitch = 1;
+    newUtterance.rate = 1;
+    newUtterance.volume = 1;
+
+    newUtterance.onend = () => {
+      setIsSpeaking(false);
+    };
+
+    // Speak the text
+    window.speechSynthesis.speak(newUtterance);
+    setIsSpeaking(true);
+    setUtterance(newUtterance);
   };
+  // Ensure voices are loaded before speaking
+  window.speechSynthesis.onvoiceschanged = function () {
+    console.log('Voices changed');
+    // You can call handleSpeak here if needed or add an event listener for when the voices are loaded
+  };
+
+
+  // Ensure voices are loaded before speaking
+  window.speechSynthesis.onvoiceschanged = function () {
+    console.log('Voices changed');
+    // You can call handleSpeak here if needed or add an event listener for when the voices are loaded
+  };
+
 
 
   const [imageData, setImageData] = useState([])
   const [uploading, setUploading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [file, setFile] = useState("");
   const [preview, setPreview] = useState("");
@@ -182,7 +228,7 @@ export default function chat() {
   };
 
   const handleMicPermition = () => {
-    console.log('permission == "denied"', permission == "denied")
+    console.log("permission", permission)
     if (permission == "denied") {
       // toast({
       //   description:
@@ -193,15 +239,18 @@ export default function chat() {
     }
   }
 
+  const handleStopSpeaking = () => {
+    if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        setIsSpeaking(false);
+    } else {
+        handleSpeak("Your text here"); // Replace with the text you want to speak
+    }
+};
+
 
   console.log('images', images)
 
-  const historyItems = [
-    "Chat 2",
-    "Chat 3",
-    "Chat 4",
-    "Chat 5",
-  ];
 
 
   const formatText = (text) => {
@@ -224,14 +273,31 @@ export default function chat() {
   };
 
   const handleNewChat = () => {
-    
+    setShowResult(false)
+    setResultData([])
+    sessionStorage.removeItem("chatHistory");
+    setInput(""); // Clear the chat input
+    setIsSidebarOpen(false); // Close the sidebar
   }
+
+  const handleKeyUpSubmit = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey && input !== "") {
+      e.preventDefault(); // Prevent the default action of adding a new line
+      if (preview !== "") {
+        handleUpload();
+      } else {
+        onSent();
+      }
+      setPreview("");
+    }
+  }
+
   return (
     <div className="flex flex-col h-screen bg-background">
       <div className="flex">
         <aside className="w-14 flex-col border-r bg-background sticky hidden md:flex top-0 h-screen">
           <nav className="flex flex-col items-center gap-4 px-2 py-5">
-            <Sheet>
+            <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
               <SheetTrigger asChild>
                 <button>
                   <Menu className="h-5 w-5" />
@@ -294,9 +360,19 @@ export default function chat() {
                                   <Button variant="outline" size="icon" onClick={() => handleCopy(chat.message)}>
                                     <Copy className="w-4 h-4" />
                                   </Button>
-                                  <Button variant="outline" size="icon" onClick={() => handleSpeak(chat.message)}>
-                                    <Volume2 className="w-4 h-4" />
-                                  </Button>
+                                  {
+                                    isSpeaking ?
+                                      (
+                                        <Button variant="outline" size="icon">
+                                          <Pause onClick={handleStopSpeaking} className="w-4 h-4" />
+                                        </Button>
+                                      ) : (
+                                        <Button variant="outline" size="icon" onClick={() => handleSpeak(chat.message)}>
+                                          <Volume2 className="w-4 h-4" />
+                                        </Button>
+                                      )
+                                  }
+
                                 </div>
                               )
                           }
@@ -324,6 +400,7 @@ export default function chat() {
                 <Textarea
                   id="message"
                   value={input}
+                  onKeyPress={handleKeyUpSubmit}
                   onChange={(e) => {
                     setInput(e.target.value);
                   }}
@@ -381,10 +458,11 @@ export default function chat() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={isListening ? stopRecognition : startRecognition}
+                            // onClick={isListening ? stopRecognition : startRecognition}
+                            // onClick={startRecognition}
                             className={isListening ? "bg-red-500 hover:bg-red-500" : ""}
                           >
-                            {permission == 'denied' ? <MicOff className="size-5" onClick={handleMicPermition} /> : (isListening) ? <CircleStop className="size-5" /> : <Mic className="size-5" />}
+                            {permission == 'denied' ? <MicOff className="size-5" onClick={handleMicPermition} /> : (isListening) ? <CircleStop onClick={stopRecognition} className="size-5" /> : <Mic onClick={startRecognition} className="size-5" />}
                           </Button>
                         </label>
                       </TooltipTrigger>
