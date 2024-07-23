@@ -27,31 +27,69 @@ export default function chat() {
   const router = useRouter()
   const { user, setUser, login, logout } = useAuth();
   const showToast = useToast()
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
-  //     if (user) {
-  //       setUser(user)
-  //     } else {
-  //       router.push("/")
-  //     }
-  //   })
 
-  //   return () => unsubscribe()
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      let sesstionUser = JSON.parse(sessionStorage.getItem("medifyUser"))
+      if (user && sesstionUser) {
+        setUser(sesstionUser)
+      } else {
+        router.push("/")
+      }
+    })
 
-  // }, [auth, router])
+    return () => unsubscribe()
+
+  }, [auth, router])
 
 
   const { onSent, recentPrompt, showResult, setShowResult, loading, resultData, setResultData, setInput, input, images, setImages } = useContext(Context)
+
+  console.log('showResult', showResult)
+  console.log('resultData', resultData)
 
   const handleThemeChange = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
   useEffect(() => {
+    if (resultData.length > 0) {
+      setShowResult(true)
+      const timestamp = new Date().getTime();
+      const dataToStore = {
+        data: resultData,
+        timestamp: timestamp
+      };
+      sessionStorage.setItem("chatList", JSON.stringify(dataToStore));
+    }
+
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [resultData]);
+
+  
+  useEffect(() => {
+    const storedData = sessionStorage.getItem("chatList");
+    if (storedData) {
+      const parsedData = JSON.parse(storedData);
+      const currentTime = new Date().getTime();
+      const dataAge = currentTime - parsedData.timestamp;
+
+      if (dataAge < 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
+        setResultData(parsedData.data);
+      } else {
+        sessionStorage.removeItem("chatList");
+
+        setResultData([]); // Clear the data if it's older than 24 hours
+      }
+    }
+  }, []);
+
+  
+  // useEffect(() => {
+  //   sessionStorage.setItem("chatList", JSON.stringify(resultData));
+  // }, [resultData]);
 
   const [transcript, setTranscript] = useState("");
   const [prompt, setPrompt] = useState("");
@@ -65,7 +103,6 @@ export default function chat() {
 
   const [chatHistory, setChatHistory] = useState([])
 
-  console.log('chatHistory', chatHistory)
   // console.log('imagePreviews', imagePreviews)
 
   useEffect(() => {
@@ -128,24 +165,27 @@ export default function chat() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [utterance, setUtterance] = useState(null);
 
-  const handleSpeak = (text) => {
-    if (isSpeaking) {
+  const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null);
+  const utteranceRef = useRef(null);
+
+  const handleSpeak = (text, index) => {
+    if (speakingMessageIndex === index) {
       // Stop the current speech
       window.speechSynthesis.cancel();
-      setIsSpeaking(false);
+      setSpeakingMessageIndex(null);
       return;
     }
 
-    // Simplified regex to remove emojis
-    const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{1FB00}-\u{1FBFF}\u{1FC00}-\u{1FFFF}\u{2000}-\u{2BFF}\u{A700}-\u{A71F}\u{FE00}-\u{FE0F}\u{E0100}-\u{E01EF}]/gu;
+    // Regex to remove emojis
+    const emojiRegex = /([\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{1FB00}-\u{1FBFF}\u{1FC00}-\u{1FFFF}\u{2000}-\u{2BFF}\u{A700}-\u{A71F}\u{FE00}-\u{FE0F}\u{E0100}-\u{E01EF}])/gu;
 
-    // Remove emojis from the text
+    // Remove emojis from the text without altering spaces
     const cleanText = text.replace(emojiRegex, '');
 
-    // Create SpeechSynthesisUtterance
-    const newUtterance = new SpeechSynthesisUtterance(cleanText);
+    // Split the text into smaller chunks if necessary
+    const maxChunkLength = 200;
+    const textChunks = cleanText.match(new RegExp('.{1,' + maxChunkLength + '}', 'g'));
 
-    // Fetch voices and select a female voice
     let voices = window.speechSynthesis.getVoices();
     let femaleVoice = voices.find(voice => voice.name.includes('Female') || voice.name.includes('Google UK English Female'));
 
@@ -153,21 +193,63 @@ export default function chat() {
       femaleVoice = voices.find(voice => voice.lang === 'en-US'); // Fallback to a default English voice if no specific female voice found
     }
 
-    newUtterance.voice = femaleVoice;
-    newUtterance.lang = 'en-US';
-    newUtterance.pitch = 1;
-    newUtterance.rate = 1;
-    newUtterance.volume = 1;
+    const speakChunk = (chunk, index) => {
+      const newUtterance = new SpeechSynthesisUtterance(chunk);
 
-    newUtterance.onend = () => {
-      setIsSpeaking(false);
+      newUtterance.voice = femaleVoice;
+      newUtterance.lang = 'en-US';
+      newUtterance.pitch = 1;
+      newUtterance.rate = 1;
+      newUtterance.volume = 1;
+
+      newUtterance.onend = () => {
+        if (index < textChunks.length - 1) {
+          speakChunk(textChunks[index + 1], index + 1);
+        } else {
+          setSpeakingMessageIndex(null);
+        }
+      };
+
+      window.speechSynthesis.speak(newUtterance);
     };
 
-    // Speak the text
-    window.speechSynthesis.speak(newUtterance);
-    setIsSpeaking(true);
-    setUtterance(newUtterance);
+    // Stop any ongoing speech only if a new message is being spoken
+    if (utteranceRef.current) {
+      window.speechSynthesis.cancel();
+    }
+
+    // Start speaking the first chunk
+    speakChunk(textChunks[0], 0);
+    setSpeakingMessageIndex(index);
+    utteranceRef.current = textChunks[0];
   };
+
+  useEffect(() => {
+    // Cleanup on component unmount
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  useEffect(() => {
+    // Cleanup on component unmount
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  useEffect(() => {
+    // Cleanup on component unmount
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+  useEffect(() => {
+    // Cleanup on component unmount
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
   // Ensure voices are loaded before speaking
   window.speechSynthesis.onvoiceschanged = function () {
     console.log('Voices changed');
@@ -239,12 +321,12 @@ export default function chat() {
     }
   }
 
-  const handleStopSpeaking = () => {
-    if (isSpeaking) {
+  const handleStopSpeaking = (index) => {
+    if (speakingMessageIndex == index) {
         window.speechSynthesis.cancel();
         setIsSpeaking(false);
     } else {
-        handleSpeak("Your text here"); // Replace with the text you want to speak
+        // handleSpeak("Your text here"); // Replace with the text you want to speak
     }
 };
 
@@ -254,28 +336,31 @@ export default function chat() {
 
 
   const formatText = (text) => {
-    // Replace *bold* with <strong>bold</strong>
-    text = text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
-
     // Replace \n with <br> for line breaks
     text = text.replace(/\n/g, '<br>');
-
+  
     // Replace - list item with <li>list item</li>
     text = text.replace(/^- (.*)/gm, '<li>$1</li>');
-
+  
+    // Replace *bold* with <strong>bold</strong>
+    text = text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+  
     // Wrap in <ul> if there are list items
     if (text.includes('<li>')) {
+      text = text.replace(/<br>/g, ''); // Remove line breaks within lists
       text = `<ul>${text}</ul>`;
     }
-
+  
     // Render as HTML
     return { __html: text };
   };
+  
 
   const handleNewChat = () => {
     setShowResult(false)
     setResultData([])
     sessionStorage.removeItem("chatHistory");
+    sessionStorage.removeItem("chatList");
     setInput(""); // Clear the chat input
     setIsSidebarOpen(false); // Close the sidebar
   }
@@ -361,13 +446,13 @@ export default function chat() {
                                     <Copy className="w-4 h-4" />
                                   </Button>
                                   {
-                                    isSpeaking ?
+                                    (speakingMessageIndex == index) ?
                                       (
                                         <Button variant="outline" size="icon">
-                                          <Pause onClick={handleStopSpeaking} className="w-4 h-4" />
+                                          <Pause onClick={() => handleSpeak(chat.message, index)} className="w-4 h-4" />
                                         </Button>
                                       ) : (
-                                        <Button variant="outline" size="icon" onClick={() => handleSpeak(chat.message)}>
+                                        <Button variant="outline" size="icon" onClick={() => handleSpeak(chat.message, index)}>
                                           <Volume2 className="w-4 h-4" />
                                         </Button>
                                       )

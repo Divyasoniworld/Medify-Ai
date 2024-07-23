@@ -85,7 +85,7 @@
 
   
   .image-animation {
-    animation: slowUpDown 3s infinite ease-in-out;
+    /* animation: slowUpDown 3s infinite ease-in-out; */
   }
 
 

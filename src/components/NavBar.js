@@ -48,6 +48,7 @@ const NavBar = () => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
                 setUser(user)
+                sessionStorage.setItem("medifyUser", JSON.stringify(user))
             } else {
                 setUser(null)
             }
@@ -60,16 +61,17 @@ const NavBar = () => {
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
         try {
-            let { user } = await signInWithPopup(auth, provider);
+            await signInWithPopup(auth, provider);
             closeDialog()
-            router.push(`/chat?auth=${user?.accessToken}`)
+            sessionStorage.setItem("medifyUser", JSON.stringify(user))
+            router.push('/chat')
         } catch (error) {
             console.log("google sign in error", error)
         }
     }
 
     return (
-        <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 ">
+        <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6  z-50">
             <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
                 <Link
                     href="#"
@@ -140,7 +142,7 @@ const NavBar = () => {
                     <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                     <span className="sr-only">Toggle theme</span>
                 </Button>
-                        <Button className="rounded-3xl bg-[#595bcc] text-white hover:bg-[#565dcf]" onClick={openDialog}>sign in</Button>
+                <Button className="rounded-3xl bg-[#595bcc] text-white hover:bg-[#565dcf]" onClick={openDialog}>sign in</Button>
 
                 <Dialog open={isDialogOpen} onOpenChange={closeDialog}>
                     <DialogTrigger asChild>

@@ -124,30 +124,30 @@ function Home() {
             <Card className="xl:col-span-1" x-chunk="dashboard-01-chunk-4" >
               <CardHeader className="flex justify-center items-center">
                 <div className="grid gap-2">
-                  <Image className="image-animation" src="/assets/images/doctor.png" width={350} height={350} alt="doctor" />
-                  <Image
+                  <Image className="image-animation" src="/assets/images/Doctor-pana.svg" width={450} height={450} alt="doctor" />
+                  {/* <Image
                     className="pill-image mt-5"
                     src="/assets/images/pillhand.png"
                     width={300}
                     height={250}
                     alt="pills-left"
-                  />
+                  /> */}
 
-                  <Image
+                  {/* <Image
                     className="pills mt-5 transparent"
                     src="/assets/images/pill4.png"
                     width={300}
                     height={250}
                     alt="pills-right"
-                  />
+                  /> */}
 
-                  <Image
+                  {/* <Image
                     className="pills-top mt-5 transparent"
                     src="/assets/images/pill4.png"
                     width={300}
                     height={250}
                     alt="pills-top"
-                  />
+                  /> */}
 
                 </div>
               </CardHeader>

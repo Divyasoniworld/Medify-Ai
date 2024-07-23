@@ -11,7 +11,7 @@ import {
     Avatar,
     AvatarFallback,
     AvatarImage,
-  } from "@/components/ui/avatar"
+} from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Link from "next/link"
@@ -28,16 +28,27 @@ import { getAuth, signOut, onAuthStateChanged } from "firebase/auth"
 import app from '../../firebaseConfig'
 import { useAuth } from '@/context/AuthContext'
 import { Context } from "@/context/ContextProvider";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 
 const MainNav = () => {
-
     const { theme, setTheme } = useTheme();
-    const { user, setUser, login, logout } = useAuth();
-    const { setInput, setResultData,setShowResult } = useContext(Context)
-
-    
+    const { user } = useAuth();
+    const { setInput, setResultData, setShowResult } = useContext(Context)
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const router = useRouter()
 
@@ -49,6 +60,9 @@ const MainNav = () => {
         try {
             const auth = getAuth(app)
             await signOut(auth)
+            sessionStorage.removeItem("chatHistory");
+            sessionStorage.removeItem("chatList");
+            sessionStorage.removeItem("medifyUser");
             router.push("/")
         } catch (error) {
             console.log("signout error", error)
@@ -59,10 +73,15 @@ const MainNav = () => {
         setShowResult(false)
         setResultData([])
         sessionStorage.removeItem("chatHistory");
+        sessionStorage.removeItem("chatList");
         setInput(""); // Clear the chat input
         setIsSidebarOpen(false); // Close the sidebar
     };
 
+    const openAlertDialog = () => {
+        setIsAlertDialogOpen(true);
+        setIsDropdownOpen(false); // Close the dropdown menu
+    }
 
     return (
         <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-50">
@@ -105,13 +124,13 @@ const MainNav = () => {
                     <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                     <span className="sr-only">Toggle theme</span>
                 </Button>
-                <DropdownMenu>
+                <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="secondary" size="icon" className="rounded-full">
+                        <Button variant="secondary" size="icon" className="rounded-full" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
                             <CircleUser className="h-5 w-5" />
                             <Avatar>
                                 <AvatarImage src={user?.photoURL} alt="profile" />
-                                <AvatarFallback>{}</AvatarFallback>
+                                <AvatarFallback>{ }</AvatarFallback>
                             </Avatar>
                             <span className="sr-only">Toggle user menu</span>
                         </Button>
@@ -121,12 +140,33 @@ const MainNav = () => {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>Settings</DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                        <DropdownMenuItem onClick={openAlertDialog}>Logout</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
+
+                <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete your account
+                                and remove your data from our servers.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel onClick={() => setIsAlertDialogOpen(false)}>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => {
+                                handleLogout();
+                                setIsAlertDialogOpen(false); // Close the dialog after logout
+                            }}>Continue</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </header>
     )
 }
+
+
 
 export default MainNav
