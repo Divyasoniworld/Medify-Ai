@@ -22,10 +22,9 @@ const ContextProvider = (props) => {
 
 
     const onSent = async (prompt) => {
-        console.log('prompt------------', prompt);
         setLoading(true);
     
-        const userMessage = { role: "user", message: input };
+        const userMessage = { role: "user", message: input, image: prompt == undefined ? "" : prompt };
         setResultData((prevResultData) => [...prevResultData, userMessage]);
     
         setShowResult(true);

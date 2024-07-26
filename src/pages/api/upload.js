@@ -1,4 +1,5 @@
 import multer from 'multer';
+import sharp from 'sharp';
 import path from 'path';
 import { promisify } from 'util';
 import ImageKit from 'imagekit';
@@ -24,14 +25,19 @@ const handler = async (req, res) => {
       return res.status(400).json({ success: false, error: 'No file uploaded' });
     }
 
-    const { buffer, originalname, mimetype } = req.file;
+    const { buffer, originalname } = req.file;
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(7);
-    const fileExtension = path.extname(originalname);
-    const newFileName = `${timestamp}-${randomString}${fileExtension}`;
+    const newFileName = `${timestamp}-${randomString}.jpeg`;
+
+    // Compress the image
+    const compressedBuffer = await sharp(buffer)
+      .resize({ width: 1920, height: 1080, fit: 'inside' }) // adjust the size as needed
+      .jpeg({ quality: 80 }) // adjust the quality as needed
+      .toBuffer();
 
     const response = await imagekit.upload({
-      file: buffer, // required
+      file: compressedBuffer, // required
       fileName: newFileName, // required
       folder: '/uploads', // optional
     });

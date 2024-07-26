@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import MainNav from "@/components/MainNav";
-import { Camera, Menu, Mic, Pill, Plus, SendHorizontal, Image, MicOff, CircleStop, CircleX, History, Copy, Volume2, Pause } from "lucide-react";
+import { Camera, Menu, Mic, Pill, Plus, SendHorizontal, Image, MicOff, CircleStop, CircleX, History, Copy, Volume2, Pause, Check } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -18,6 +18,7 @@ import { useToast } from "@/context/ToastProvider"
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth"
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
+import Skeleton from "react-loading-skeleton";
 
 export default function chat() {
 
@@ -26,7 +27,7 @@ export default function chat() {
   const auth = getAuth()
   const router = useRouter()
   const { user, setUser, login, logout } = useAuth();
-  console.log('user ', user )
+  console.log('user ', user)
   const showToast = useToast()
 
   useEffect(() => {
@@ -52,23 +53,36 @@ export default function chat() {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  useEffect(() => {
-    if (resultData.length > 0) {
-      setShowResult(true)
-      const timestamp = new Date().getTime();
-      const dataToStore = {
-        data: resultData,
-        timestamp: timestamp
-      };
-      localStorage.setItem("chatList", JSON.stringify(dataToStore));
-    }
-
+  const scrollToBottom = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 100); // Adjust the timeout duration if needed
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (resultData.length > 0) {
+      setShowResult(true);
+      const timestamp = new Date().getTime();
+      const dataToStore = {
+        data: resultData,
+        timestamp: timestamp,
+      };
+      localStorage.setItem("chatList", JSON.stringify(dataToStore));
+      scrollToBottom(); // Ensure we scroll to the bottom after setting resultData
+    }
   }, [resultData]);
 
-  
+
+
+
   useEffect(() => {
     const storedData = localStorage.getItem("chatList");
     if (storedData) {
@@ -86,7 +100,7 @@ export default function chat() {
     }
   }, []);
 
-  
+
   // useEffect(() => {
   //   localStorage.setItem("chatList", JSON.stringify(resultData));
   // }, [resultData]);
@@ -156,11 +170,16 @@ export default function chat() {
 
 
 
-  const handleCopy = (text) => {
-    navigator.clipboard?.writeText(text.trim()).then(() => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (text, index) => {
+    navigator.clipboard.writeText(text.trim()).then(() => {
+      setCopied(index);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000); // 2 seconds
     });
   };
-
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [utterance, setUtterance] = useState(null);
 
@@ -274,19 +293,13 @@ export default function chat() {
   const [preview, setPreview] = useState("");
   const [fileName, setFileName] = useState('');
 
-  const handleFileChange = (e) => {
+  const [isUploading, setIsUploading] = useState(false)
+
+  const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setPreview(URL.createObjectURL(selectedFile));
-    }
-  };
-  const handleUpload = async () => {
-
-    if (file == "") return;
-
+    setIsUploading(true)
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', selectedFile);
     try {
       const response = await axios.post('/api/upload', formData, {
         headers: {
@@ -295,13 +308,21 @@ export default function chat() {
       });
 
       if (response.data.success) {
-        console.log('upload response-----', response.data)
+        setPreview(response.data.url);
         setFileName(response.data.url);
-        onSent(response.data?.url)
+        setIsUploading(false)
       }
     } catch (error) {
+      setIsUploading(false)
       console.error('Error uploading file:', error);
     }
+
+
+  };
+
+  const handleUpload = async () => {
+    onSent(fileName)
+    setInput("")
   };
 
 
@@ -323,34 +344,34 @@ export default function chat() {
 
   const handleStopSpeaking = (index) => {
     if (speakingMessageIndex == index) {
-        window.speechSynthesis.cancel();
-        setIsSpeaking(false);
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
     } else {
-        // handleSpeak("Your text here"); // Replace with the text you want to speak
+      // handleSpeak("Your text here"); // Replace with the text you want to speak
     }
-};
+  };
 
 
   const formatText = (text) => {
     // Replace \n with <br> for line breaks
     text = text.replace(/\n/g, '<br>');
-  
+
     // Replace - list item with <li>list item</li>
     text = text.replace(/^- (.*)/gm, '<li>$1</li>');
-  
+
     // Replace *bold* with <strong>bold</strong>
     text = text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
-  
+
     // Wrap in <ul> if there are list items
     if (text.includes('<li>')) {
       text = text.replace(/<br>/g, ''); // Remove line breaks within lists
       text = `<ul>${text}</ul>`;
     }
-  
+
     // Render as HTML
     return { __html: text };
   };
-  
+
 
   const handleNewChat = () => {
     setShowResult(false)
@@ -415,6 +436,19 @@ export default function chat() {
                     return (
                       <div key={index} className="flex items-start gap-3 justify-end">
                         <div className="bg-primary rounded-lg p-3 max-w-[80%] text-primary-foreground">
+                          {
+                            chat.image != "" ?
+                              (
+                                <div className="w-16 h-32 md:w-20 md:h-30 mb-2">
+                                  <img
+                                    src={chat.image}
+                                    alt="User Image"
+                                    className="w-full h-full object-cover rounded-lg"
+                                  />
+                                </div>
+                              ) : ""
+                          }
+
                           <p className="text-sm">{chat.message}</p>
                         </div>
                         <Avatar className="w-8 h-8">
@@ -440,8 +474,9 @@ export default function chat() {
                             chat.message == "loading..." ? "" :
                               (
                                 <div className="flex gap-2 mt-2">
-                                  <Button variant="outline" size="icon" onClick={() => handleCopy(chat.message)}>
-                                    <Copy className="w-4 h-4" />
+                                  <Button variant="outline" size="icon" onClick={() => handleCopy(chat.message, index)}>
+                                    {/* <Copy className="w-4 h-4" /> */}
+                                    {copied == index ? <Check className="w-4 h-4 text-[#595bcc]" /> : <Copy size={24} className="w-4 h-4" />}
                                   </Button>
                                   {
                                     (speakingMessageIndex == index) ?
@@ -564,18 +599,31 @@ export default function chat() {
                 <div className="flex flex-wrap items-center p-3 pt-0">
                   {/* {images.map((image, index) => ( */}
                   <div className="relative mr-2 mb-2">
+
                     {
-                      preview != "" ? <img src={preview} alt="Preview" className="h-16 w-16 rounded-md" /> : ""
+                      !isUploading ?
+                        (
+                          preview ?
+                            (
+                              <>
+                                <img src={preview} alt="Preview" className="h-16 w-16 rounded-md" />
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleImageDelete()}
+                                  className="cancel_preview absolute top-0 right-7 m-1"
+                                >
+                                  <CircleX className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )
+                            : ""
+                        ) :
+                        <Skeleton width={64} height={64} style={{ border: "3px solid #f3f4f6" }} />
                     }
 
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleImageDelete()}
-                      className="cancel_preview absolute top-0 right-7 m-1"
-                    >
-                      <CircleX className="h-4 w-4" />
-                    </Button>
+
+
                   </div>
                   {/* ))} */}
                 </div>
