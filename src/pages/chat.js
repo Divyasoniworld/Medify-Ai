@@ -26,12 +26,14 @@ export default function chat() {
   const auth = getAuth()
   const router = useRouter()
   const { user, setUser, login, logout } = useAuth();
+  console.log('user ', user )
   const showToast = useToast()
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      let sesstionUser = JSON.parse(sessionStorage.getItem("medifyUser"))
-      if (user && sesstionUser) {
+      let sesstionUser = JSON.parse(localStorage.getItem("medifyUser"))
+      console.log('sesstionUser', sesstionUser)
+      if (sesstionUser) {
         setUser(sesstionUser)
       } else {
         router.push("/")
@@ -45,8 +47,6 @@ export default function chat() {
 
   const { onSent, recentPrompt, showResult, setShowResult, loading, resultData, setResultData, setInput, input, images, setImages } = useContext(Context)
 
-  console.log('showResult', showResult)
-  console.log('resultData', resultData)
 
   const handleThemeChange = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -60,7 +60,7 @@ export default function chat() {
         data: resultData,
         timestamp: timestamp
       };
-      sessionStorage.setItem("chatList", JSON.stringify(dataToStore));
+      localStorage.setItem("chatList", JSON.stringify(dataToStore));
     }
 
     if (chatContainerRef.current) {
@@ -70,7 +70,7 @@ export default function chat() {
 
   
   useEffect(() => {
-    const storedData = sessionStorage.getItem("chatList");
+    const storedData = localStorage.getItem("chatList");
     if (storedData) {
       const parsedData = JSON.parse(storedData);
       const currentTime = new Date().getTime();
@@ -79,7 +79,7 @@ export default function chat() {
       if (dataAge < 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
         setResultData(parsedData.data);
       } else {
-        sessionStorage.removeItem("chatList");
+        localStorage.removeItem("chatList");
 
         setResultData([]); // Clear the data if it's older than 24 hours
       }
@@ -88,7 +88,7 @@ export default function chat() {
 
   
   // useEffect(() => {
-  //   sessionStorage.setItem("chatList", JSON.stringify(resultData));
+  //   localStorage.setItem("chatList", JSON.stringify(resultData));
   // }, [resultData]);
 
   const [transcript, setTranscript] = useState("");
@@ -96,7 +96,6 @@ export default function chat() {
   const [recognition, setRecognition] = useState(null);
   const [permission, setPermission] = useState(null);
   const [isListening, setIsListening] = useState(false);
-  console.log('isListening', isListening)
   const [imagePreviews, setImagePreviews] = useState([]);
   // const [chatMessages, setChatMessages] = useState(chatData);
   const [showCards, setShowCards] = useState(true);
@@ -271,6 +270,7 @@ export default function chat() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [file, setFile] = useState("");
+  console.log('file--------', file)
   const [preview, setPreview] = useState("");
   const [fileName, setFileName] = useState('');
 
@@ -283,7 +283,7 @@ export default function chat() {
   };
   const handleUpload = async () => {
 
-    if (!file) return;
+    if (file == "") return;
 
     const formData = new FormData();
     formData.append('file', file);
@@ -295,9 +295,9 @@ export default function chat() {
       });
 
       if (response.data.success) {
-        console.log('response', response.data.fileName)
-        setFileName(response.data.fileName);
-        onSent(response.data?.fileName)
+        console.log('upload response-----', response.data)
+        setFileName(response.data.url);
+        onSent(response.data?.url)
       }
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -331,10 +331,6 @@ export default function chat() {
 };
 
 
-  console.log('images', images)
-
-
-
   const formatText = (text) => {
     // Replace \n with <br> for line breaks
     text = text.replace(/\n/g, '<br>');
@@ -359,8 +355,8 @@ export default function chat() {
   const handleNewChat = () => {
     setShowResult(false)
     setResultData([])
-    sessionStorage.removeItem("chatHistory");
-    sessionStorage.removeItem("chatList");
+    localStorage.removeItem("chatHistory");
+    localStorage.removeItem("chatList");
     setInput(""); // Clear the chat input
     setIsSidebarOpen(false); // Close the sidebar
   }
@@ -369,8 +365,10 @@ export default function chat() {
     if (e.key === 'Enter' && !e.shiftKey && input !== "") {
       e.preventDefault(); // Prevent the default action of adding a new line
       if (preview !== "") {
+        console.log("-----handleupload")
         handleUpload();
       } else {
+        console.log("-----onsent")
         onSent();
       }
       setPreview("");
@@ -557,7 +555,7 @@ export default function chat() {
                     </Tooltip>
                   </TooltipProvider>
                   <div className="ml-auto flex items-center space-x-2" >
-                    <Button disabled={input === ""} size="icon" onClick={() => { preview != "" ? handleUpload() : onSent(), setPreview("") }}>
+                    <Button disabled={input === ""} size="icon" onClick={handleKeyUpSubmit}>
                       <SendHorizontal className="size-4" />
                       <span className="sr-only">Send</span>
                     </Button>

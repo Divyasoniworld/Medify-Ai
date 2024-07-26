@@ -3,6 +3,20 @@
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import fs from "fs";
 import path from "path";
+import axios from 'axios';
+
+async function getImageAsBase64(imageUrl) {
+  try {
+    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+    const buffer = Buffer.from(response.data, 'binary');
+    return buffer.toString('base64');   
+
+  } catch (error) {
+    console.error('Error fetching image:', error);
+    return null;
+  }
+}
+
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -63,6 +77,8 @@ export default async function handler(req, res) {
   try {
     const { transcript, dataimage, history } = req.body;
 
+    console.log('-------dataimage', dataimage)
+
     const chatSession = model.startChat({
       generationConfig,
       history: [
@@ -107,22 +123,22 @@ export default async function handler(req, res) {
     });
 
     let result;
-    if (dataimage && fs.existsSync(dataimage)) {
-      console.log("first")
-      const imageBuffer = fs.readFileSync(dataimage);
+    if (dataimage != undefined) {
+      const base64Image = await getImageAsBase64(dataimage);
       const image = {
         inlineData: {
-          data: Buffer.from(imageBuffer).toString("base64"),
+          data: base64Image,
           mimeType: "image/png",
         },
       };
+      console.log('apiimage', image)
       result = await chatSession.sendMessage([transcript, image]);
     } else {
       console.log("second")
       result = await chatSession.sendMessage(transcript);
     }
 
-    console.log('result.response?.candidates[0]', result.response?.candidates[0])
+    console.log('result.response?.candidates[0]', result)
     const responseText = result.response?.candidates[0]?.content?.parts == undefined ? result.response.text() : result.response.candidates[0].content.parts?.map(part => part.text).join('\n\n')
     const newHistory = [
       ...history,

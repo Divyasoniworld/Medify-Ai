@@ -58,6 +58,7 @@ import { useAuth } from "@/context/AuthContext"
 import { getAuth } from "firebase/auth"
 import { useEffect } from "react"
 import app from '../../firebaseConfig'
+import Footer from '@/components/Footer'
 
 function Home() {
   const router = useRouter()
@@ -119,7 +120,7 @@ function Home() {
       </aside>
       <div className="flex-1">
         <NavBar />
-        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+        <main className=" main-chat-div flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
           <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-2">
             <Card className="xl:col-span-1" x-chunk="dashboard-01-chunk-4" >
               <CardHeader className="flex justify-center items-center">
@@ -170,6 +171,7 @@ function Home() {
             </Card>
           </div>
         </main>
+        {/* <Footer /> */}
       </div>
     </div>
   )

@@ -48,7 +48,7 @@ const NavBar = () => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
                 setUser(user)
-                sessionStorage.setItem("medifyUser", JSON.stringify(user))
+                localStorage.setItem("medifyUser", JSON.stringify(user))
             } else {
                 setUser(null)
             }
@@ -63,7 +63,7 @@ const NavBar = () => {
         try {
             await signInWithPopup(auth, provider);
             closeDialog()
-            sessionStorage.setItem("medifyUser", JSON.stringify(user))
+            localStorage.setItem("medifyUser", JSON.stringify(user))
             router.push('/chat')
         } catch (error) {
             console.log("google sign in error", error)

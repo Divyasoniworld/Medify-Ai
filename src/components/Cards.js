@@ -30,7 +30,7 @@ const Cards = () => {
             {
                 cardsNames.map((card, index) => {
                     return (
-                        <Card className="xl:col-span-1 " >
+                        <Card className="xl:col-span-1 " key={index} >
                             <CardHeader className="h-full w-full bg-gray-300 rounded-md bg-clip-padding backdrop-filter backdrop-blur-3xl backdrop-brightness-100 bg-opacity-15">
                                 <CardTitle className="text-md cursor-pointer" onClick={()=>{setInput(card?.value)}} >{card?.value}</CardTitle>
                             </CardHeader>

@@ -7,7 +7,6 @@ const AuthContext = createContext();
 // Create a provider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // User state
-console.log('user', user)
   const login = (userData) => {
     setUser(userData); // Set user data on login
   };

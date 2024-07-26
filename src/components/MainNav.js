@@ -60,9 +60,9 @@ const MainNav = () => {
         try {
             const auth = getAuth(app)
             await signOut(auth)
-            sessionStorage.removeItem("chatHistory");
-            sessionStorage.removeItem("chatList");
-            sessionStorage.removeItem("medifyUser");
+            localStorage.removeItem("chatHistory");
+            localStorage.removeItem("chatList");
+            localStorage.removeItem("medifyUser");
             router.push("/")
         } catch (error) {
             console.log("signout error", error)
@@ -72,8 +72,8 @@ const MainNav = () => {
     const handleNewChat = () => {
         setShowResult(false)
         setResultData([])
-        sessionStorage.removeItem("chatHistory");
-        sessionStorage.removeItem("chatList");
+        localStorage.removeItem("chatHistory");
+        localStorage.removeItem("chatList");
         setInput(""); // Clear the chat input
         setIsSidebarOpen(false); // Close the sidebar
     };

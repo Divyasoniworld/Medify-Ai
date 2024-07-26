@@ -16,13 +16,13 @@ const ContextProvider = (props) => {
     const [images, setImages] = useState([])
 
     useEffect(() => {
-        const savedHistory = JSON.parse(sessionStorage.getItem('chatHistory')) || [];
+        const savedHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
         setHistory(savedHistory);
     }, []);
 
 
     const onSent = async (prompt) => {
-        console.log('prompt', prompt);
+        console.log('prompt------------', prompt);
         setLoading(true);
     
         const userMessage = { role: "user", message: input };
@@ -45,7 +45,7 @@ const ContextProvider = (props) => {
             const data = await response.data;
             const newHistory = data.newHistory;
             setHistory(newHistory);
-            sessionStorage.setItem('chatHistory', JSON.stringify(newHistory));
+            localStorage.setItem('chatHistory', JSON.stringify(newHistory));
     
             const aiResponse = { role: "AI", message: response.data?.response };
     

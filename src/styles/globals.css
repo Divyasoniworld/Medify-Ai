@@ -76,10 +76,10 @@
   }
 
   html, body {
-    height: 100%;
+    height: 100dvh;
     margin: 0;
     padding: 0;
-    /* overflow: hidden;  */
+    overflow: hidden; 
   }
   
 
@@ -109,7 +109,10 @@
   
   @media (max-width: 641px) {
     .title-tagline {
-      margin-top: -30px;
+      margin-top: -70px;
+    }
+    .image-animation{
+      margin-top: -20px;
     }
   }
 
@@ -411,6 +414,28 @@ border-radius: 16px;
 box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 backdrop-filter: blur(14.7px);
 -webkit-backdrop-filter: blur(14.7px);
+}
+
+
+/* Example custom CSS for further refinement */
+@media (max-width: 768px) {
+  .navbar {
+      padding: 0 1rem;
+  }
+
+  .navbar .nav-links {
+      display: none;
+  }
+
+  .navbar .menu-icon {
+      display: block;
+  }
+}
+
+@media (min-width: 769px) {
+  .navbar .menu-icon {
+      display: none;
+  }
 }
 
 
