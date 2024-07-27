@@ -62,6 +62,7 @@ const MainNav = () => {
             await signOut(auth)
             localStorage.removeItem("chatHistory");
             localStorage.removeItem("chatList");
+            localStorage.removeItem("chatList");
             localStorage.removeItem("medifyUser");
             router.push("/")
         } catch (error) {
@@ -137,8 +138,8 @@ const MainNav = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Settings</DropdownMenuItem>
+                        {/* <DropdownMenuSeparator /> */}
+                        {/* <DropdownMenuItem>Settings</DropdownMenuItem> */}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={openAlertDialog}>Logout</DropdownMenuItem>
                     </DropdownMenuContent>
@@ -147,10 +148,9 @@ const MainNav = () => {
                 <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogTitle>Logout</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete your account
-                                and remove your data from our servers.
+                            Are you sure you want to log out? Your chat history will be deleted and cannot be recovered. Please confirm to proceed.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

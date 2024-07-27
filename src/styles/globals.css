@@ -3,8 +3,6 @@
   @tailwind utilities;
 
   
-
-
   @layer base {
     :root {
       --background: 0 0% 100%;
@@ -84,22 +82,6 @@
   
 
   
-  .image-animation {
-    /* animation: slowUpDown 3s infinite ease-in-out; */
-  }
-
-
-
-  .card-title {
-    background: linear-gradient(to right, #007bff, #ffffff, #45527a);
-    padding: 10px 20px;
-    border-radius: 5px;
-  }
-
-  body {
-    /* height: 100% !important; */
-  }
-  
   @media (max-width: 641px) {
     .image-animation {
       width: 280px;
@@ -109,7 +91,7 @@
   
   @media (max-width: 641px) {
     .title-tagline {
-      margin-top: -70px;
+      margin-top: -50px;
     }
     .image-animation{
       margin-top: -20px;
@@ -436,6 +418,10 @@ backdrop-filter: blur(14.7px);
   .navbar .menu-icon {
       display: none;
   }
+}
+
+.accordion-trigger{
+  text-decoration: none;
 }
 
 

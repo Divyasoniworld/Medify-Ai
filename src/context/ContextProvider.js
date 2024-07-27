@@ -56,7 +56,7 @@ const ContextProvider = (props) => {
             });
         } catch (error) {
             console.error('Error:', error);
-            const errorMessage = { role: "AI", message: "An error occurred. Please try again later." };
+            const errorMessage = { role: "AI", message: "I apologize, but I couldn't understand your request. Please try asking me something different." };
     
             // Replace the loading placeholder with the error message
             setResultData((prevResultData) => {

@@ -353,24 +353,40 @@ export default function chat() {
 
 
   const formatText = (text) => {
-    // Replace \n with <br> for line breaks
-    text = text.replace(/\n/g, '<br>');
+    // Replace **bold** with <strong>bold</strong>
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-    // Replace - list item with <li>list item</li>
-    text = text.replace(/^- (.*)/gm, '<li>$1</li>');
+    // Replace - or * list item with <li>list item</li>
+    text = text.replace(/^[*-] (.*)/gm, '<li>$1</li>');
 
-    // Replace *bold* with <strong>bold</strong>
-    text = text.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+    // Handle URLs and add light blue color
+    text = text.replace(
+      /\[(.*?)\]\((.*?)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #595bcc;">$1</a><br>'
+    );
 
-    // Wrap in <ul> if there are list items
+    // Wrap list items in <ul> if there are list items
     if (text.includes('<li>')) {
-      text = text.replace(/<br>/g, ''); // Remove line breaks within lists
-      text = `<ul>${text}</ul>`;
+      text = text.replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>'); // Wrap <li> items in <ul> tags
+      text = text.replace(/<\/ul><ul>/g, ''); // Merge consecutive <ul> tags
     }
+
+    // Replace new lines with <br> tags
+    text = text.replace(/\n/g, '<br>');
 
     // Render as HTML
     return { __html: text };
   };
+
+
+
+
+
+
+
+
+
+
 
 
   const handleNewChat = () => {
@@ -383,17 +399,44 @@ export default function chat() {
   }
 
   const handleKeyUpSubmit = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey && input !== "") {
-      e.preventDefault(); // Prevent the default action of adding a new line
-      if (preview !== "") {
-        console.log("-----handleupload")
-        handleUpload();
+    console.log('e', e)
+    if (input.trim() != "") {   
+      if (e._reactName == "onClick") {
+        e.preventDefault(); // Prevent the default action of adding a new line
+        if (preview !== "") {
+          console.log("-----handleupload")
+          handleUpload();
+        } else {
+          console.log("-----onsent")
+          onSent();
+        }
+        setPreview("");
       } else {
-        console.log("-----onsent")
-        onSent();
+        if (e.key === "Enter") {
+          if (input.trim() === '') {
+            // Do nothing or handle empty input scenario if needed
+            setInput("")
+            return;
+          }
+        }
+        if (e.key === 'Enter' && !e.shiftKey && input !== "") {
+          e.preventDefault(); // Prevent the default action of adding a new line
+          if (preview !== "") {
+            console.log("-----handleupload")
+            if (input.trim() === '') {
+              // Do nothing or handle empty input scenario if needed
+              return;
+            }
+            handleUpload();
+          } else {
+            console.log("-----onsent")
+            onSent();
+          }
+          setPreview("");
+        }
       }
-      setPreview("");
     }
+
   }
 
   return (
@@ -518,7 +561,7 @@ export default function chat() {
                 <Textarea
                   id="message"
                   value={input}
-                  onKeyPress={handleKeyUpSubmit}
+                  onKeyDown={handleKeyUpSubmit}
                   onChange={(e) => {
                     setInput(e.target.value);
                   }}
@@ -590,7 +633,7 @@ export default function chat() {
                     </Tooltip>
                   </TooltipProvider>
                   <div className="ml-auto flex items-center space-x-2" >
-                    <Button disabled={input === ""} size="icon" onClick={handleKeyUpSubmit}>
+                    <Button disabled={input.trim() === ""} size="icon" onClick={handleKeyUpSubmit}>
                       <SendHorizontal className="size-4" />
                       <span className="sr-only">Send</span>
                     </Button>
