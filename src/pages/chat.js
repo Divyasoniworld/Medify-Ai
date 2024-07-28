@@ -6,52 +6,45 @@ import { Button } from "@/components/ui/button";
 import MainNav from "@/components/MainNav";
 import { Camera, Menu, Mic, Pill, Plus, SendHorizontal, Image, MicOff, CircleStop, CircleX, History, Copy, Volume2, Pause, Check } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { useTheme } from "next-themes";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import axios from "axios";
 import Cards from "@/components/Cards";
 import { Context } from "@/context/ContextProvider";
-import Loader from "@/components/Loader";
 import { useToast } from "@/context/ToastProvider"
-import { getAuth, signOut, onAuthStateChanged } from "firebase/auth"
+import { getAuth } from "firebase/auth"
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import Skeleton from "react-loading-skeleton";
 
 export default function chat() {
 
-  const { theme, setTheme } = useTheme();
-  const chatContainerRef = useRef(null);
   const auth = getAuth()
   const router = useRouter()
-  const { user, setUser, login, logout } = useAuth();
-  console.log('user ', user)
   const showToast = useToast()
+  const { user, setUser } = useAuth();
+  const chatContainerRef = useRef(null);
+  const utteranceRef = useRef(null);
+
+  const [recognition, setRecognition] = useState(null);
+  const [permission, setPermission] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null);
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [preview, setPreview] = useState("");
+  const [fileName, setFileName] = useState('');
+  const [isUploading, setIsUploading] = useState(false)
+
+  const { onSent, showResult, setShowResult, resultData, setResultData, setInput, input, } = useContext(Context)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      let sesstionUser = JSON.parse(localStorage.getItem("medifyUser"))
-      console.log('sesstionUser', sesstionUser)
-      if (sesstionUser) {
-        setUser(sesstionUser)
-      } else {
-        router.push("/")
-      }
-    })
-
-    return () => unsubscribe()
+    let sesstionUser = JSON.parse(localStorage.getItem("medifyUser"))
+    setUser(sesstionUser)
 
   }, [auth, router])
 
-
-  const { onSent, recentPrompt, showResult, setShowResult, loading, resultData, setResultData, setInput, input, images, setImages } = useContext(Context)
-
-
-  const handleThemeChange = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -81,8 +74,6 @@ export default function chat() {
   }, [resultData]);
 
 
-
-
   useEffect(() => {
     const storedData = localStorage.getItem("chatList");
     if (storedData) {
@@ -101,22 +92,7 @@ export default function chat() {
   }, []);
 
 
-  // useEffect(() => {
-  //   localStorage.setItem("chatList", JSON.stringify(resultData));
-  // }, [resultData]);
 
-  const [transcript, setTranscript] = useState("");
-  const [prompt, setPrompt] = useState("");
-  const [recognition, setRecognition] = useState(null);
-  const [permission, setPermission] = useState(null);
-  const [isListening, setIsListening] = useState(false);
-  const [imagePreviews, setImagePreviews] = useState([]);
-  // const [chatMessages, setChatMessages] = useState(chatData);
-  const [showCards, setShowCards] = useState(true);
-
-  const [chatHistory, setChatHistory] = useState([])
-
-  // console.log('imagePreviews', imagePreviews)
 
   useEffect(() => {
     const SpeechRecognition =
@@ -170,8 +146,8 @@ export default function chat() {
 
 
 
-  const [copied, setCopied] = useState(false);
-
+  
+//copy message
   const handleCopy = (text, index) => {
     navigator.clipboard.writeText(text.trim()).then(() => {
       setCopied(index);
@@ -180,12 +156,8 @@ export default function chat() {
       }, 2000); // 2 seconds
     });
   };
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [utterance, setUtterance] = useState(null);
 
-  const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null);
-  const utteranceRef = useRef(null);
-
+ //speak function
   const handleSpeak = (text, index) => {
     if (speakingMessageIndex === index) {
       // Stop the current speech
@@ -262,18 +234,13 @@ export default function chat() {
       window.speechSynthesis.cancel();
     };
   }, []);
+
   useEffect(() => {
     // Cleanup on component unmount
     return () => {
       window.speechSynthesis.cancel();
     };
   }, []);
-  // Ensure voices are loaded before speaking
-  window.speechSynthesis.onvoiceschanged = function () {
-    console.log('Voices changed');
-    // You can call handleSpeak here if needed or add an event listener for when the voices are loaded
-  };
-
 
   // Ensure voices are loaded before speaking
   window.speechSynthesis.onvoiceschanged = function () {
@@ -282,18 +249,13 @@ export default function chat() {
   };
 
 
+  // Ensure voices are loaded before speaking
+  window.speechSynthesis.onvoiceschanged = function () {
+    console.log('Voices changed');
+    // You can call handleSpeak here if needed or add an event listener for when the voices are loaded
+  };
 
-  const [imageData, setImageData] = useState([])
-  const [uploading, setUploading] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const [file, setFile] = useState("");
-  console.log('file--------', file)
-  const [preview, setPreview] = useState("");
-  const [fileName, setFileName] = useState('');
-
-  const [isUploading, setIsUploading] = useState(false)
 
   const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
@@ -333,25 +295,13 @@ export default function chat() {
   const handleMicPermition = () => {
     console.log("permission", permission)
     if (permission == "denied") {
-      // toast({
-      //   description:
-      //     "Microphone permission denied. Please enable it in your browser settings.",
-
-      // });
       showToast("Microphone permission denied. Please enable it in your browser settings.")
     }
   }
 
-  const handleStopSpeaking = (index) => {
-    if (speakingMessageIndex == index) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-    } else {
-      // handleSpeak("Your text here"); // Replace with the text you want to speak
-    }
-  };
 
 
+  //formated response
   const formatText = (text) => {
     // Replace **bold** with <strong>bold</strong>
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -378,17 +328,6 @@ export default function chat() {
     return { __html: text };
   };
 
-
-
-
-
-
-
-
-
-
-
-
   const handleNewChat = () => {
     setShowResult(false)
     setResultData([])
@@ -399,15 +338,12 @@ export default function chat() {
   }
 
   const handleKeyUpSubmit = (e) => {
-    console.log('e', e)
-    if (input.trim() != "") {   
+    if (input.trim() != "") {
       if (e._reactName == "onClick") {
         e.preventDefault(); // Prevent the default action of adding a new line
         if (preview !== "") {
-          console.log("-----handleupload")
           handleUpload();
         } else {
-          console.log("-----onsent")
           onSent();
         }
         setPreview("");
@@ -422,14 +358,12 @@ export default function chat() {
         if (e.key === 'Enter' && !e.shiftKey && input !== "") {
           e.preventDefault(); // Prevent the default action of adding a new line
           if (preview !== "") {
-            console.log("-----handleupload")
             if (input.trim() === '') {
               // Do nothing or handle empty input scenario if needed
               return;
             }
             handleUpload();
           } else {
-            console.log("-----onsent")
             onSent();
           }
           setPreview("");
@@ -438,6 +372,7 @@ export default function chat() {
     }
 
   }
+
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -471,7 +406,7 @@ export default function chat() {
         </aside>
         <div className="main-chat-div flex-1 flex flex-col">
           <MainNav />
-          <div className="flex-1 overflow-auto pt-16 p-4" ref={chatContainerRef}>
+          <div className="flex-1 overflow-auto pt-16 p-4 custom-scrollbar" ref={chatContainerRef}>
             <div className="grid gap-4">
               {showResult ? (
                 resultData.map((chat, index) => {
@@ -518,7 +453,6 @@ export default function chat() {
                               (
                                 <div className="flex gap-2 mt-2">
                                   <Button variant="outline" size="icon" onClick={() => handleCopy(chat.message, index)}>
-                                    {/* <Copy className="w-4 h-4" /> */}
                                     {copied == index ? <Check className="w-4 h-4 text-[#595bcc]" /> : <Copy size={24} className="w-4 h-4" />}
                                   </Button>
                                   {
@@ -551,7 +485,6 @@ export default function chat() {
           <div className="sticky bottom-0 bg-card p-4">
             <div className="relative">
               <div
-                // onSubmit={handleSubmit}
                 className="relative chat-box md:mt-4 overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
                 x-chunk="dashboard-03-chunk-1"
               >
@@ -619,8 +552,6 @@ export default function chat() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            // onClick={isListening ? stopRecognition : startRecognition}
-                            // onClick={startRecognition}
                             className={isListening ? "bg-red-500 hover:bg-red-500" : ""}
                           >
                             {permission == 'denied' ? <MicOff className="size-5" onClick={handleMicPermition} /> : (isListening) ? <CircleStop onClick={stopRecognition} className="size-5" /> : <Mic onClick={startRecognition} className="size-5" />}
@@ -640,7 +571,6 @@ export default function chat() {
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center p-3 pt-0">
-                  {/* {images.map((image, index) => ( */}
                   <div className="relative mr-2 mb-2">
 
                     {
@@ -662,15 +592,14 @@ export default function chat() {
                             )
                             : ""
                         ) :
-                        <Skeleton width={64} height={64} style={{ border: "3px solid #f3f4f6" }} />
+                        <Skeleton width={64} height={64} style={{ border: "3px solid rgb(212 212 212)" }} />
                     }
-
-
-
                   </div>
-                  {/* ))} */}
                 </div>
               </div>
+            </div>
+            <div className="text-sm md:text-md dark:text-white text-slate-600 flex justify-center items-center mt-2">
+              General info only. Consult a doctor for advice.
             </div>
           </div>
         </div>

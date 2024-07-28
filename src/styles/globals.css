@@ -1,356 +1,187 @@
 @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
+@tailwind components;
+@tailwind utilities;
 
-  
-  @layer base {
-    :root {
-      --background: 0 0% 100%;
-      --foreground: 224 71.4% 4.1%;
-      --card: 0 0% 100%;
-      --card-foreground: 224 71.4% 4.1%;
-      --popover: 0 0% 100%;
-      --popover-foreground: 224 71.4% 4.1%;
-      --primary: 220.9 39.3% 11%;
-      --primary-foreground: 210 20% 98%;
-      --secondary: 220 14.3% 95.9%;
-      --secondary-foreground: 220.9 39.3% 11%;
-      --muted: 220 14.3% 95.9%;
-      --muted-foreground: 220 8.9% 46.1%;
-      --accent: 220 14.3% 95.9%;
-      --accent-foreground: 220.9 39.3% 11%;
-      --destructive: 0 84.2% 60.2%;
-      --destructive-foreground: 210 20% 98%;
-      --border: 220 13% 91%;
-      --input: 220 13% 91%;
-      --ring: 224 71.4% 4.1%;
-      --radius: 0.75rem;
-    }
-  
-    .dark {
-      --background: 224 71.4% 4.1%;
-      --foreground: 210 20% 98%;
-      --card: 224 71.4% 4.1%;
-      --card-foreground: 210 20% 98%;
-      --popover: 224 71.4% 4.1%;
-      --popover-foreground: 210 20% 98%;
-      --primary: 210 20% 98%;
-      --primary-foreground: 220.9 39.3% 11%;
-      --secondary: 215 27.9% 16.9%;
-      --secondary-foreground: 210 20% 98%;
-      --muted: 215 27.9% 16.9%;
-      --muted-foreground: 217.9 10.6% 64.9%;
-      --accent: 215 27.9% 16.9%;
-      --accent-foreground: 210 20% 98%;
-      --destructive: 0 62.8% 30.6%;
-      --destructive-foreground: 210 20% 98%;
-      --border: 215 27.9% 16.9%;
-      --input: 215 27.9% 16.9%;
-      --ring: 216 12.2% 83.9%;
-    }
-  }
-  
-  
 
-  
-  
-  @layer base {
-    * {
-      @apply border-border;
-    }
-    body {
-      @apply bg-background text-foreground;
-    }
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 220.9 39.3% 11%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 224 71.4% 4.1%;
+    --radius: 0.75rem;
   }
 
-
-  @keyframes slowUpDown {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
+  .dark {
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 220.9 39.3% 11%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 216 12.2% 83.9%;
   }
-
-  html, body {
-    height: 100dvh;
-    margin: 0;
-    padding: 0;
-    overflow: hidden; 
-  }
-  
-
-  
-  @media (max-width: 641px) {
-    .image-animation {
-      width: 280px;
-    }
-  }
-
-  
-  @media (max-width: 641px) {
-    .title-tagline {
-      margin-top: -50px;
-    }
-    .image-animation{
-      margin-top: -20px;
-    }
-  }
-
-  @media (max-width: 641px) {
-    .left-capsule{
-      color: transparent;
-      top: 100px;
-      width: 80PX;
-      left: 50px;
-    }
-  }
-
-
-
-  .pill-image {
-    rotate: 90deg;
-    color: transparent;
-    position: absolute;
-    width: 200px;
-    top: 250px;
-    right: 34px;
-  }
-
-  .pills{
-    position: absolute;
-    width: 160px;
-    top: 450px;
-    left: 50px;
-    rotate: -20deg;
-    opacity: 0.8;
-    animation: slowUpDown 3s infinite ease-in-out;
-  }
-
-  .pills-top{
-    position: absolute;
-    width: 160px;
-    top: 80px;
-    rotate: 30deg;
-    left: 50px;
-    opacity: 0.8;
-    animation: slowUpDown 3s infinite ease-in-out;
-  }
-
-  /* heart beat */
-.heartbeatloader {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  z-index: 1;
-  top: 66px;
-  left: 100px;
-  right: 0;
-  bottom: 0;
 }
 
-.main-chat-div{
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+
+html,
+body {
   height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
-.svgdraw {
-  top: 30%;
-  left: 26%;
-  position: absolute;
-  width: 50%;
-  height: 50%;
-  transform: scale(1.4);
-  z-index: 3;
-}
 
-.path {
-  stroke: rgba(0, 0, 0, 0.95);
-  stroke-width: 4;
-  stroke-dasharray: 1000px;
-  stroke-dashoffset: 1000px;
-  animation: draw 1.5s infinite forwards normal linear;
-  animation-delay: 0.1s;
-  position: relative;
-}
-
-@keyframes draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.innercircle {
-  position: absolute;
-  top: 17%;
-  left: 100.5%;
-  transform: translate(-50%, -50%) scale(1.2);
-  width: 160%;
-  height: auto;
-  z-index: 1;
-  opacity: 0.97;
-  animation: innerbeat 1.5s infinite linear forwards;
-}
-
-.innercircle:before,
-.innercircle:after {
-  position: absolute;
-  content: "";
-  left: 25%;
-  top: 0;
-  width: 25%;
-  height: auto;
-  padding-bottom: 40%;
-  background: rgb(225, 95, 95);
-  border-radius: 50px 50px 0 0;
-  transform: rotate(-45deg);
-  transform-origin: 0 100%;
-}
-
-.innercircle:after {
-  left: 0;
-  transform: rotate(45deg);
-  transform-origin: 100% 100%;
-}
-
-@keyframes innerbeat {
-  0% {
-    transform: translate(-50%, -50%) scale(1.2);
-  }
-
-  10% {
-    transform: translate(-50%, -50%) scale(1.2);
-  }
-
-  50% {
-    transform: translate(-50%, -50%) scale(1.3);
-  }
-
-  60% {
-    transform: translate(-50%, -50%) scale(1.25);
-  }
-
-  75% {
-    transform: translate(-50%, -50%) scale(1.3);
-  }
-}
-
-.outercircle {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  /* background-color: rgba(230, 92, 92, 0.774); */
-  /* box-shadow: 0 0 30px 0px #000; */
-  position: absolute;
-  z-index: 1;
-  opacity: 0.7;
-  top: 0;
-  left: 0;
-  transform: scale(1.2);
-  animation: outerbeat 1.5s infinite linear forwards;
-}
-
-@keyframes outerbeat {
-  0% {
-    transform: scale(1.2);
-  }
-
-  10% {
-    transform: scale(1.2);
-  }
-
-  50% {
-    transform: scale(1.3);
-  }
-
-  60% {
-    transform: scale(1.25);
-  }
-
-  75% {
-    transform: scale(1.3);
-  }
+.main-chat-div {
+  height: 100dvh;
 }
 
 .cancel_preview {
   top: -12px;
 }
 
-@media (max-width: 768px) {
-  .toaster-mobile{
-top: 500px;
-  }
-}
-
-
-  @media (max-width: 768px) {
-    .pill-image {
-      rotate: 1800deg;
-      width: 100px;
-      position: absolute;
-      left: 20px;
-      top: 44px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .pills {
-      display: none;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .pills-top {
-      display: none;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .chat-div {
-      /* height: 650px; */
-    }
-  }
-
-  /* @media (max-width: 768px) {
-    .space-div {
-      flex: 1 1 0%;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .chat-screen {
-      flex: 0.84 1 0%;
-    }
-  } */
-
-  @media (max-width: 768px) {
-    .side-sheet {
-      width: 250px;
-    }
-  }
-
-  @media (max-width: 768px) {
-  #faq-section {
-    height: 700px !important;
-  }
-}
-
-.chat-section{
+.chat-section {
   min-height: 75% !important;
 }
- 
-.chat-history{
+
+.chat-history {
   height: 85% !important;
 }
 
+.skeleton-loading {
+  border-radius: 4px;
+}
+
+.card-effect {
+  background: rgba(201, 188, 188, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(14.7px);
+  -webkit-backdrop-filter: blur(14.7px);
+}
+
+.accordion-trigger {
+  text-decoration: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #595bcc, #f1f1f1);
+  border-radius: 10px;
+  border: 3px solid #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #4da6a2, #3b807e);
+}
+
 @media (max-width: 768px) {
-  .chat-history{
+  .navbar {
+    padding: 0 1rem;
+  }
+
+  .navbar .nav-links {
+    display: none;
+  }
+
+  .navbar .menu-icon {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .toaster-mobile {
+    top: 500px;
+  }
+}
+
+@media (min-width: 769px) {
+  .navbar .menu-icon {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-history {
     height: 65% !important;
   }
 }
 
 
-  
+@media (max-width: 768px) {
+  .side-sheet {
+    width: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  #faq-section {
+    height: 700px !important;
+  }
+}
+
+@media (max-width: 641px) {
+  .image-animation {
+    width: 280px;
+  }
+}
+
+
+@media (max-width: 641px) {
+  .title-tagline {
+    margin-top: -50px;
+  }
+
+  .image-animation {
+    margin-top: -20px;
+  }
+}
 
 @keyframes dash_682 {
   72.5% {
@@ -362,68 +193,14 @@ top: 500px;
   }
 }
 
-  
+@keyframes slowUpDown {
 
-
-.skeleton-loading {
-  border-radius: 4px; /* Optional: Rounded corners */
-}
-
-
-/* styles/globals.css */
-/* styles/globals.css */
-/* styles/globals.css */
-/* styles/globals.css */
-.page-transition-enter {
-  opacity: 0;
-}
-.page-transition-enter-active {
-  opacity: 1;
-  transition: opacity 300ms ease-in;
-}
-.page-transition-exit {
-  opacity: 1;
-}
-.page-transition-exit-active {
-  opacity: 0;
-  transition: opacity 300ms ease-in;
-}
-
-.card-effect{
-/* From https://css.glass */
-background: rgba(201, 188, 188, 0.2);
-border-radius: 16px;
-box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-backdrop-filter: blur(14.7px);
--webkit-backdrop-filter: blur(14.7px);
-}
-
-
-/* Example custom CSS for further refinement */
-@media (max-width: 768px) {
-  .navbar {
-      padding: 0 1rem;
+  0%,
+  100% {
+    transform: translateY(0);
   }
 
-  .navbar .nav-links {
-      display: none;
-  }
-
-  .navbar .menu-icon {
-      display: block;
+  50% {
+    transform: translateY(-10px);
   }
 }
-
-@media (min-width: 769px) {
-  .navbar .menu-icon {
-      display: none;
-  }
-}
-
-.accordion-trigger{
-  text-decoration: none;
-}
-
-
-
-  

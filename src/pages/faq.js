@@ -48,7 +48,7 @@ const Faq = () => {
             <AccordionItem value="item-5">
               <AccordionTrigger>How can I contact support?</AccordionTrigger>
               <AccordionContent>
-                You can contact support through our Contact Us page. Our team is available to assist you with any issues or questions you may have. Click <a href="mailto:divyasoniworld@gmail.com" className="text-blue-500 underline">here</a> to contact us.
+                Our team is available to assist you with any issues or questions you may have. Click <a href="mailto:divyasoniworld@gmail.com" className="text-blue-500 underline">here</a> to contact us.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-6">

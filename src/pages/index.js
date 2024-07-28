@@ -1,27 +1,10 @@
 import Link from "next/link"
 import {
-  Activity,
-  ArrowUpRight,
-  CircleUser,
-  CreditCard,
-  DollarSign,
   Menu,
-  MessageSquareMore,
-  Package2,
-  Pill,
-  Plus,
-  Search,
-  Users,
-  History,
-  MessageSquareText
+  MessageSquareText,
+  File
 } from "lucide-react"
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -30,41 +13,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import Cards from "@/components/Cards"
 import NavBar from "@/components/NavBar"
 import Image from "next/image"
 import { useRouter } from "next/router"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { useDialog } from '@/context/DialogContext';
 import { useAuth } from "@/context/AuthContext"
 import { getAuth } from "firebase/auth"
 import { useEffect } from "react"
 import app from '../../firebaseConfig'
-import Footer from '@/components/Footer'
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
+import NewFeatureText from "@/components/NewFeatureText"
 
 function Home() {
   const router = useRouter()
@@ -75,7 +33,9 @@ function Home() {
     router.push("/chat")
   }
 
-  const { user, setUser, login, logout } = useAuth();
+  const { setUser } = useAuth();
+
+
 
   useEffect(() => {
     const auth = getAuth(app);
@@ -112,10 +72,16 @@ function Home() {
                   </Link>
                 </Link>
 
-                <Link href="/faq" className="text-foreground hover:text-foreground ml-2">
+                <Link href="/faq" className="text-foreground hover:text-foreground">
                   <div className='flex items-center  text-base'>
-                    <MessageSquareText className='size-4 mr-2' />
+                    <MessageSquareText className='size-4 mr-2 mt-1' />
                     Faq's
+                  </div>
+                </Link>
+                <Link href="/privacy" className="text-foreground hover:text-foreground">
+                  <div className='flex items-center  text-base'>
+                    <File className='size-4 mr-2 mt-1' />
+                    Privacy policy
                   </div>
                 </Link>
               </nav>
@@ -140,47 +106,35 @@ function Home() {
                 </div>
               </CardHeader>
             </Card>
-
             <Card className="title-tagline" x-chunk="dashboard-01-chunk-5">
               <CardContent>
-                <div className="flex justify-center items-center mt-3 md:mt-7">
+                <div className="flex justify-center items-center mt-6 md:mt-10">
                   <CardTitle className="text-5xl p-2 font-bold bg-gradient-to-r from-blue-700 via-blue to-slate-600 bg-clip-text text-transparent whitespace-nowrap">
                     Medify
                   </CardTitle>
                 </div>
-                <CardDescription className="text-lg md:text-3xl dark:text-white font-semibold text-slate-600 flex justify-center items-center mt-5">
+                <CardDescription className="text-lg md:text-3xl dark:text-white font-semibold text-slate-600 flex justify-center items-center mt-8 md:mt-12">
                   Know your meds, simplify your health
                 </CardDescription>
-                <div className="flex justify-center mt-10 items-center">
+                <div className="flex justify-center mt-12 md:mt-16 items-center">
                   <Button onClick={openDialog} className="rounded-3xl bg-[#595bcc] text-white hover:bg-[#565dcf]">
                     Connect with Medify
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* <Card className="extra-card md:hidden lg:hidden" x-chunk="dashboard-01-chunk-6">
-              <CardContent>
-                <div className="flex justify-center items-center mt-3 md:mt-7">
-                  <CardTitle className="text-5xl p-2 font-bold bg-gradient-to-r from-green-700 via-green to-slate-600 bg-clip-text text-transparent whitespace-nowrap">
-                    Extra Card
-                  </CardTitle>
-                </div>
-                <CardDescription className="text-lg md:text-3xl dark:text-white font-semibold text-slate-600 flex justify-center items-center mt-5">
-                  Additional Content
+                <CardDescription className="hidden md:flex lg:flex text-lg md:text-xl dark:text-white font-semibold text-slate-600 mt-10 lg:mt-16 justify-center items-center">
+                  <NewFeatureText text="New features coming soon. Stay tuned!" />
                 </CardDescription>
               </CardContent>
-            </Card> */}
+            </Card>
             <Card className="extra-card md:hidden lg:hidden mt-10" x-chunk="dashboard-01-chunk-6">
               <CardContent>
                 <div className="flex flex-col items-center text-center">
                   <CardDescription className="text-lg md:text-3xl dark:text-white font-semibold text-slate-600 flex justify-center items-center mt-5">
-                    New features coming soon. Stay tuned!
+                    <NewFeatureText text=" New features coming soon. Stay tuned!" />
                   </CardDescription>
                 </div>
               </CardContent>
             </Card>
-
           </div>
         </main>
       </div>

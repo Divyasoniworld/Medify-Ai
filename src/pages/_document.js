@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 import { ThemeProvider } from "@/components/theme-provider";
 import { useTheme } from "next-themes";
 // import { Toaster } from "@/components/ui/toaster"
-import { Toaster } from "react-hot-toast";
+
 export default function Document({ children }) {
 
   return (
@@ -12,7 +12,7 @@ export default function Document({ children }) {
         <meta property="og:title" content="Medify AI" />
           <meta property="og:description" content="Know your meds, simplify your health" />
             <meta property="og:image" content="https://ik.imagekit.io/medifyai/appImages/appImage.png" />
-            <link rel="icon" type="image/png" href="https://ik.imagekit.io/medifyai/appImages/appImage.png"></link>
+            <link rel="icon" type="image/png" href="https://ik.imagekit.io/medifyai/appImages/favicon.png"></link>
               <title>Medify AI</title>
             </Head>
             <body

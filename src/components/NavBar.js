@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Link from "next/link"
-import { CircleUser, Menu, MessageSquareText, Moon, Package2, Pi, Pill, Search, Sun } from 'lucide-react'
+import { CircleUser, Menu, MessageSquareText, Moon, Package2, Pi, Pill, Search, Sun, File } from 'lucide-react'
 import { Button } from './ui/button'
 import { useTheme } from 'next-themes'
 import {
@@ -61,7 +61,7 @@ const NavBar = () => {
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
         try {
-            await signInWithPopup(auth, provider);
+           let {user} = await signInWithPopup(auth, provider);
             closeDialog()
             localStorage.setItem("medifyUser", JSON.stringify(user))
             router.push('/chat')
@@ -104,16 +104,21 @@ const NavBar = () => {
                             href="#"
                             className="flex items-center gap-2 text-lg font-semibold"
                         >
-                            <Pill className="h-6 w-6" />
                             <Link href="" className="text-foreground text-2xl font-bold transition-colors hover:text-foreground">
                                 Medify<span className='text-[#595bcc]'>AI</span>
                             </Link>
                         </Link>
 
-                        <Link href="/faq" className="text-foreground hover:text-foreground ml-2">
+                        <Link href="/faq" className="text-foreground hover:text-foreground">
                             <div className='flex items-center  text-base'>
-                                <MessageSquareText className='size-4 mr-2' />
+                                <MessageSquareText className='size-4 mr-2 mt-1' />
                                 Faq's
+                            </div>
+                        </Link>
+                        <Link href="/privacy" className="text-foreground hover:text-foreground">
+                            <div className='flex items-center  text-base'>
+                                <File className='size-4 mr-2 mt-1' />
+                                Privacy policy
                             </div>
                         </Link>
                     </nav>
@@ -141,6 +146,7 @@ const NavBar = () => {
                     <DialogTrigger asChild>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
+                        <DialogTitle></DialogTitle>
                         <DialogHeader>
                             <DialogTitle>Sign In with Google</DialogTitle>
                             <DialogDescription>

@@ -1,8 +1,6 @@
 // pages/api/medifyAI.js
 
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
-import fs from "fs";
-import path from "path";
 import axios from 'axios';
 
 async function getImageAsBase64(imageUrl) {
@@ -77,8 +75,6 @@ export default async function handler(req, res) {
   try {
     const { transcript, dataimage, history } = req.body;
 
-    console.log('-------dataimage', dataimage)
-
     const chatSession = model.startChat({
       generationConfig,
       history: [
@@ -143,15 +139,11 @@ export default async function handler(req, res) {
           mimeType: "image/png",
         },
       };
-      console.log('apiimage', image)
       result = await chatSession.sendMessage([transcript, image]);
     } else {
-      console.log("second")
       result = await chatSession.sendMessage(transcript);
     }
-
-    console.log('text response----', result.response.text())
-    console.log('result.response?.candidates[0]?.content?.parts', result.response?.candidates[0]?.content?.parts)
+   
     const responseText = result.response?.candidates[0]?.content?.parts == undefined ? result.response.text() : result.response.candidates[0].content.parts?.map(part => part.text).join('\n\n')
     const newHistory = [
       ...history,

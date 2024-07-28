@@ -60,8 +60,9 @@ const MainNav = () => {
         try {
             const auth = getAuth(app)
             await signOut(auth)
+            setShowResult(false)
+            setResultData([])
             localStorage.removeItem("chatHistory");
-            localStorage.removeItem("chatList");
             localStorage.removeItem("chatList");
             localStorage.removeItem("medifyUser");
             router.push("/")
@@ -150,7 +151,7 @@ const MainNav = () => {
                         <AlertDialogHeader>
                             <AlertDialogTitle>Logout</AlertDialogTitle>
                             <AlertDialogDescription>
-                            Are you sure you want to log out? Your chat history will be deleted and cannot be recovered. Please confirm to proceed.
+                                Are you sure you want to log out? Your chat history will be deleted and cannot be recovered. Please confirm to proceed.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

@@ -1,7 +1,6 @@
 import { useTheme } from 'next-themes';
 import React, { createContext, useContext, useCallback, useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import stylesContainer from './ToastProvider.module.css'; // Import the CSS module
 
 const ToastContext = createContext();
 

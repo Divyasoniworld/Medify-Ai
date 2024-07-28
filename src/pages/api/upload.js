@@ -1,13 +1,12 @@
 import multer from 'multer';
 import sharp from 'sharp';
-import path from 'path';
 import { promisify } from 'util';
 import ImageKit from 'imagekit';
 
 const imagekit = new ImageKit({
-  publicKey: 'public_g08MB1DLrjzW9Jk2wr0qmRHDKwc=',
-  privateKey: 'private_Q1oxuN7db0FjW6w8UNuBfI+a3t0=',
-  urlEndpoint: 'https://ik.imagekit.io/medifyai'
+  publicKey: process.env.IMGKIT_PUBLICKEY,
+  privateKey: process.env.IMGKIT_PRIVATEKEY,
+  urlEndpoint: process.env.IMGKIT_URLENDPOINT
 });
 
 // Multer setup
@@ -25,15 +24,16 @@ const handler = async (req, res) => {
       return res.status(400).json({ success: false, error: 'No file uploaded' });
     }
 
-    const { buffer, originalname } = req.file;
+    const { buffer } = req.file;
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(7);
     const newFileName = `${timestamp}-${randomString}.jpeg`;
 
-    // Compress the image
+    // Compress the image and ensure correct orientation
     const compressedBuffer = await sharp(buffer)
-      .resize({ width: 1920, height: 1080, fit: 'inside' }) // adjust the size as needed
-      .jpeg({ quality: 80 }) // adjust the quality as needed
+      .rotate() // Auto-orient based on the EXIF metadata
+      .resize({ width: 1920, height: 1080, fit: 'inside' }) // Adjust the size as needed
+      .jpeg({ quality: 80 }) // Adjust the quality as needed
       .toBuffer();
 
     const response = await imagekit.upload({
