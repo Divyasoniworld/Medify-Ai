@@ -23,6 +23,9 @@ import { getAuth } from "firebase/auth"
 import { useEffect } from "react"
 import app from '../../firebaseConfig'
 import NewFeatureText from "@/components/NewFeatureText"
+import SparklesText from "@/components/magicui/sparkles-text";
+import { cn } from "@/lib/utils";
+import AnimatedShinyText from "@/components/magicui/animated-shiny-text";
 
 function Home() {
   const router = useRouter()
@@ -121,16 +124,38 @@ function Home() {
                     Connect with Medify
                   </Button>
                 </div>
-                <CardDescription className="hidden md:flex lg:flex text-lg md:text-xl dark:text-white font-semibold text-slate-600 mt-10 lg:mt-16 justify-center items-center">
-                  <NewFeatureText text="New features coming soon. Stay tuned!" />
+                <CardDescription className="hidden md:flex lg:flex text-lg md:text-xl dark:text-white font-semibold text-slate-600 mt-8 lg:mt-16 justify-center items-center">
+                  {/* <NewFeatureText text="New features coming soon. Stay tuned!" /> */}
+                  <div className="z-10 flex min-h-[1rem] items-center justify-center">
+                    <div
+                      className={cn(
+                        "group rounded-full border border-black/5 bg-neutral-100 text-base text-white transition-all ease-in hover:cursor-pointer hover:bg-neutral-200 dark:border-white/5 dark:bg-neutral-900 dark:hover:bg-neutral-800",
+                      )}
+                    >
+                      <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400">
+                        <span>🐣 New features coming soon. Stay tuned!</span>
+                      </AnimatedShinyText>
+                    </div>
+                  </div>
                 </CardDescription>
               </CardContent>
             </Card>
             <Card className="extra-card md:hidden lg:hidden mt-10" x-chunk="dashboard-01-chunk-6">
               <CardContent>
                 <div className="flex flex-col items-center text-center">
-                  <CardDescription className="text-lg md:text-3xl dark:text-white font-semibold text-slate-600 flex justify-center items-center mt-5">
-                    <NewFeatureText text=" New features coming soon. Stay tuned!" />
+                  <CardDescription className="text-lg md:text-3xl dark:text-white font-semibold text-slate-600 flex justify-center items-center mt-3">
+                    {/* <NewFeatureText text=" New features coming soon. Stay tuned!" /> */}
+                    <div className="z-10 flex items-center justify-center">
+                      <div
+                        className={cn(
+                          "group rounded-full border border-black/5 bg-neutral-100 text-base text-white transition-all ease-in hover:cursor-pointer hover:bg-neutral-200 dark:border-white/5 dark:bg-neutral-900 dark:hover:bg-neutral-800",
+                        )}
+                      >
+                        <AnimatedShinyText className="inline-flex items-center justify-center px-1.5 py-1 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400">
+                          <span>🐣 New features coming soon. Stay tuned!</span>
+                        </AnimatedShinyText>
+                      </div>
+                    </div>
                   </CardDescription>
                 </div>
               </CardContent>

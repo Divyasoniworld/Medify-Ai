@@ -61,8 +61,8 @@ const NavBar = () => {
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
         try {
-           let {user} = await signInWithPopup(auth, provider);
             closeDialog()
+            let { user } = await signInWithPopup(auth, provider);
             localStorage.setItem("medifyUser", JSON.stringify(user))
             router.push('/chat')
         } catch (error) {

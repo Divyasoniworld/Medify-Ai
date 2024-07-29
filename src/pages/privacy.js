@@ -12,9 +12,9 @@ const PrivacyPolicy = () => {
         </Link>
       </header>
       <main className="flex flex-1 flex-col items-center justify-start gap-4 p-4 md:gap-8 md:p-8 overflow-hidden">
-        <div className="w-full max-w-xl flex-1 overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(100vh - 150px)' }}>
+        <div className="w-full max-w-xl flex-1 " >
           <h1 className="text-2xl font-bold text-center mb-4">Privacy Policy</h1>
-          <div className="text-left px-3">
+          <div className="text-left px-3 overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(100vh - 200px)' }}>
             <p className="mb-4">
               Welcome to MedifyAI. We value your privacy and are committed to protecting your personal information. This privacy policy outlines how we handle your data when you use our services.
             </p>
