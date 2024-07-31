@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import MainNav from "@/components/MainNav";
-import { Camera, Menu, Mic, Pill, Plus, SendHorizontal, Image, MicOff, CircleStop, CircleX, History, Copy, Volume2, Pause, Check } from "lucide-react";
+import { X, Camera, Menu, Mic, Pill, Plus, SendHorizontal, Image, MicOff, CircleStop, CircleX, History, Copy, Volume2, Pause, Check } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -45,6 +45,21 @@ export default function chat() {
     setUser(sesstionUser)
 
   }, [auth, router])
+
+  const [showAlert, setShowAlert] = useState(true);
+
+  useEffect(() => {
+    // Check if the alert has already been shown
+    const hasAlertBeenShown = localStorage.getItem('chatAlertShown');
+
+    if (!hasAlertBeenShown) {
+      // Show the alert
+      setShowAlert(true);
+
+      // Set the flag in localStorage to prevent showing the alert again
+      localStorage.setItem('chatAlertShown', 'true');
+    }
+  }, []);
 
 
   const scrollToBottom = () => {
@@ -171,13 +186,12 @@ export default function chat() {
 
     // Regex to remove emojis
     const emojiRegex = /([\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{1FB00}-\u{1FBFF}\u{1FC00}-\u{1FFFF}\u{2000}-\u{2BFF}\u{A700}-\u{A71F}\u{FE00}-\u{FE0F}\u{E0100}-\u{E01EF}])/gu;
-    // const emojiRegex = /[\*\u1F600-\u1F64F\u2702-\u27B0\u1F680-\u1F6C0\u24C2-\u1F251\u1F30D-\u1F567\u1F004\u2600-\u26FF]/g
     const asteriskRegex = /\*/g;
     let cleanedText = text.replace(asteriskRegex, '');
+
     // Remove emojis from the text without altering spaces
     const cleanText = cleanedText.replace(emojiRegex, '');
 
-    // Split the text into smaller chunks if necessary
     const maxChunkLength = 200;
     const textChunks = cleanText.match(new RegExp('.{1,' + maxChunkLength + '}', 'g'));
 
@@ -185,7 +199,7 @@ export default function chat() {
     let femaleVoice = voices.find(voice => voice.name.includes('Female') || voice.name.includes('Google UK English Female'));
 
     if (!femaleVoice) {
-      femaleVoice = voices.find(voice => voice.lang === 'en-US'); // Fallback to a default English voice if no specific female voice found
+      femaleVoice = voices.find(voice => voice.lang === 'en-US'); 
     }
 
     const speakChunk = (chunk, index) => {
@@ -250,14 +264,12 @@ export default function chat() {
   // Ensure voices are loaded before speaking
   window.speechSynthesis.onvoiceschanged = function () {
     console.log('Voices changed');
-    // You can call handleSpeak here if needed or add an event listener for when the voices are loaded
   };
 
 
   // Ensure voices are loaded before speaking
   window.speechSynthesis.onvoiceschanged = function () {
     console.log('Voices changed');
-    // You can call handleSpeak here if needed or add an event listener for when the voices are loaded
   };
 
 
@@ -413,6 +425,7 @@ export default function chat() {
           <MainNav />
           <div className="flex-1 overflow-auto pt-16 p-4 custom-scrollbar" ref={chatContainerRef}>
             <div className="grid gap-4">
+
               {showResult ? (
                 resultData.map((chat, index) => {
                   if (chat.role !== "AI") {
@@ -482,7 +495,11 @@ export default function chat() {
                   }
                 })
               ) : (
-                <Cards />
+                <>
+                  <Cards />
+                 
+                </>
+
               )}
             </div>
 

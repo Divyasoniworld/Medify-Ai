@@ -69,7 +69,6 @@ const ContextProvider = (props) => {
     };
 
 
-    // onSent("Hello")
 
     const contextValue = {
         prevPrompts,

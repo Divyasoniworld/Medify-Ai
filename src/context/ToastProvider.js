@@ -9,7 +9,7 @@ export const ToastProvider = ({ children }) => {
   const activeToastIdRef = useRef(null);
 
   const showToast = useCallback((title, icon, type) => {
-    // Get the latest theme value inside the callback
+    
     const currentTheme = theme;
 
     if (activeToastIdRef.current) {

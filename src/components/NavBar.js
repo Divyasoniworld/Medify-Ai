@@ -1,12 +1,4 @@
 import React, { useEffect } from 'react'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Link from "next/link"
 import { CircleUser, Menu, MessageSquareText, Moon, Package2, Pi, Pill, Search, Sun, File } from 'lucide-react'
@@ -16,13 +8,10 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from '@/context/AuthContext';
 import { getAuth } from "firebase/auth"
@@ -41,7 +30,7 @@ const NavBar = () => {
         setTheme(theme === 'dark' ? 'light' : 'dark');
     };
 
-    const { user, setUser, login, logout } = useAuth();
+    const { setUser } = useAuth();
 
     useEffect(() => {
         const auth = getAuth(app);
@@ -126,14 +115,6 @@ const NavBar = () => {
             </Sheet>
             <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
                 <form className="ml-auto flex-1 sm:flex-initial">
-                    <div className="relative">
-                        {/* <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search products..."
-                className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-              /> */}
-                    </div>
                 </form>
                 <Button variant="outline" size="icon" onClick={handleThemeChange}>
                     <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -160,23 +141,6 @@ const NavBar = () => {
 
                     </DialogContent>
                 </Dialog>
-
-                {/* <Dialog>
-                    <DialogTrigger><Button className="rounded-3xl bg-[#595bcc] text-white hover:bg-[#565dcf] ">sign in</Button></DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Sign In with Google</DialogTitle>
-                            <DialogDescription>
-                                Or sign in with other methods (coming soon!)
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        <div className="grid gap-4 py-4">
-                            <Button className="gap-3" variant="outline" type="submit" onClick={signInWithGoogle}><FcGoogle size={20} /> Login with Google</Button>
-                        </div>
-
-                    </DialogContent>
-                </Dialog> */}
             </div>
         </header>
     )

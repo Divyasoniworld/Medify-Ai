@@ -12,19 +12,13 @@ import {
     AvatarFallback,
     AvatarImage,
 } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Link from "next/link"
-import { CircleUser, History, Menu, Moon, Package2, Pi, Pill, Plus, Search, Settings, Sun } from 'lucide-react'
+import { CircleUser, Eraser, LogOut, Menu, Moon, Pill, Plus, Sun } from 'lucide-react'
 import { Button } from './ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import { Label } from './ui/label'
-import { Switch } from './ui/switch'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/router'
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
-import { getAuth, signOut, onAuthStateChanged } from "firebase/auth"
+import { getAuth, signOut } from "firebase/auth"
 import app from '../../firebaseConfig'
 import { useAuth } from '@/context/AuthContext'
 import { Context } from "@/context/ContextProvider";
@@ -36,8 +30,7 @@ import {
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+    AlertDialogTitle
 } from "@/components/ui/alert-dialog"
 
 
@@ -75,6 +68,14 @@ const MainNav = () => {
         setShowResult(false)
         setResultData([])
         localStorage.removeItem("chatHistory");
+        localStorage.removeItem("chatList");
+        setInput(""); // Clear the chat input
+        setIsSidebarOpen(false); // Close the sidebar
+    };
+
+    const handleClearChat = () => {
+        setShowResult(false)
+        setResultData([])
         localStorage.removeItem("chatList");
         setInput(""); // Clear the chat input
         setIsSidebarOpen(false); // Close the sidebar
@@ -139,10 +140,9 @@ const MainNav = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        {/* <DropdownMenuSeparator /> */}
-                        {/* <DropdownMenuItem>Settings</DropdownMenuItem> */}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={openAlertDialog}>Logout</DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleClearChat} ><Eraser className='size-4 mr-2 mt-1'/>Clear chat</DropdownMenuItem>
+                        <DropdownMenuItem onClick={openAlertDialog}><LogOut className='size-4 mr-2 mt-1'/>Logout</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
 

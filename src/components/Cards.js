@@ -6,7 +6,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Activity, CreditCard, DollarSign, Users } from 'lucide-react'
 import { Context } from "@/context/ContextProvider";
 
 const cardsNames = [

@@ -20,7 +20,7 @@ const Faq = () => {
       <main className="flex flex-1 flex-col items-center justify-start gap-4 p-4 md:gap-8 md:p-8 overflow-hidden">
         <div className="w-full max-w-xl">
           <h1 className="text-2xl font-bold text-center mb-4">Frequently Asked Questions</h1>
-          <Accordion className='px-3' type="single" collapsible>
+          <Accordion className='px-3 overflow-y-auto custom-scrollbar' style={{ maxHeight: 'calc(100vh - 250px)' }} type="single" collapsible>
             <AccordionItem value="item-1">
               <AccordionTrigger>What is MedifyAI?</AccordionTrigger>
               <AccordionContent>
@@ -58,6 +58,15 @@ const Faq = () => {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-7">
+              <AccordionTrigger className="text-left">What is the difference between "Clear Chat" and "New Chat"?</AccordionTrigger>
+              <AccordionContent>
+                When you click <strong>Clear Chat</strong>, the current chat messages are cleared, but the MedifyAI remembers your past conversation history. This allows the MedifyAI to continue understanding the context from your previous interactions.
+              </AccordionContent>
+              <AccordionContent>
+                However, when you start a <strong>New Chat</strong>, it clears both the current chat messages and the MedifyAI's past memory of your conversations. This is useful if you want to start a completely fresh conversation with the MedifyAI without any prior context.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-8">
               <AccordionTrigger>Is MedifyAI free to use?</AccordionTrigger>
               <AccordionContent>
                 Yes, MedifyAI is free to use. You can access all its features without any cost.

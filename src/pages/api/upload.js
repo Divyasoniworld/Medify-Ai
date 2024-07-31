@@ -31,15 +31,15 @@ const handler = async (req, res) => {
 
     // Compress the image and ensure correct orientation
     const compressedBuffer = await sharp(buffer)
-      .rotate() // Auto-orient based on the EXIF metadata
-      .resize({ width: 1920, height: 1080, fit: 'inside' }) // Adjust the size as needed
-      .jpeg({ quality: 80 }) // Adjust the quality as needed
+      .rotate() 
+      .resize({ width: 1920, height: 1080, fit: 'inside' }) 
+      .jpeg({ quality: 80 }) 
       .toBuffer();
 
     const response = await imagekit.upload({
-      file: compressedBuffer, // required
-      fileName: newFileName, // required
-      folder: '/uploads', // optional
+      file: compressedBuffer, 
+      fileName: newFileName, 
+      folder: '/uploads', 
     });
 
     res.status(200).json({ success: true, url: response.url, fileId: response.fileId });

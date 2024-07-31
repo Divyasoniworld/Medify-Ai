@@ -22,8 +22,6 @@ import { useAuth } from "@/context/AuthContext"
 import { getAuth } from "firebase/auth"
 import { useEffect } from "react"
 import app from '../../firebaseConfig'
-import NewFeatureText from "@/components/NewFeatureText"
-import SparklesText from "@/components/magicui/sparkles-text";
 import { cn } from "@/lib/utils";
 import AnimatedShinyText from "@/components/magicui/animated-shiny-text";
 
@@ -125,7 +123,6 @@ function Home() {
                   </Button>
                 </div>
                 <CardDescription className="hidden md:flex lg:flex text-lg md:text-xl dark:text-white font-semibold text-slate-600 mt-8 lg:mt-16 justify-center items-center">
-                  {/* <NewFeatureText text="New features coming soon. Stay tuned!" /> */}
                   <div className="z-10 flex min-h-[1rem] items-center justify-center">
                     <div
                       className={cn(
@@ -144,7 +141,6 @@ function Home() {
               <CardContent>
                 <div className="flex flex-col items-center text-center">
                   <CardDescription className="text-lg md:text-3xl dark:text-white font-semibold text-slate-600 flex justify-center items-center mt-3">
-                    {/* <NewFeatureText text=" New features coming soon. Stay tuned!" /> */}
                     <div className="z-10 flex items-center justify-center">
                       <div
                         className={cn(
