@@ -30,10 +30,6 @@ function Home() {
 
   const { openDialog } = useDialog();
 
-  const handleChatModule = () => {
-    router.push("/chat")
-  }
-
   const { setUser } = useAuth();
 
 

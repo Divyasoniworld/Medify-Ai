@@ -97,13 +97,13 @@ export default function chat() {
       const currentTime = new Date().getTime();
       const dataAge = currentTime - parsedData.timestamp;
 
-      if (dataAge < 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
+      // if (dataAge < 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
         setResultData(parsedData.data);
-      } else {
-        localStorage.removeItem("chatList");
+      // } else {
+      //   localStorage.removeItem("chatList");
 
-        setResultData([]); // Clear the data if it's older than 24 hours
-      }
+      //   setResultData([]); // Clear the data if it's older than 24 hours
+      // }
     }
   }, []);
 
@@ -161,6 +161,32 @@ export default function chat() {
   };
 
 
+  //get browser name
+
+  const getBrowserName = () => {
+    const { userAgent } = navigator;
+    
+    if (/firefox|fxios/i.test(userAgent)) {
+      return 'Firefox';
+    } else if (/chrome|crios|crmo/i.test(userAgent)) {
+      return 'Chrome';
+    } else if (/safari/i.test(userAgent) && !/chrome|crios|crmo/i.test(userAgent)) {
+      return 'Safari';
+    } else if (/msie|trident/i.test(userAgent)) {
+      return 'Internet Explorer';
+    } else if (/edg/i.test(userAgent)) {
+      return 'Edge';
+    } else if (/opera|opr\//i.test(userAgent)) {
+      return 'Opera';
+    }
+    
+    return 'Unknown';
+  };
+  
+  // Example usage
+  console.log(`Browser: ${getBrowserName()}`);
+  
+
 
 
   //copy message
@@ -175,6 +201,8 @@ export default function chat() {
 
   //speak function
   const handleSpeak = (text, index) => {
+    let browserName = getBrowserName()
+    
     if (speakingMessageIndex === index) {
       // Stop the current speech
       window.speechSynthesis.cancel();
@@ -196,7 +224,13 @@ export default function chat() {
     const textChunks = cleanText.match(new RegExp('.{1,' + maxChunkLength + '}', 'g'));
 
     let voices = window.speechSynthesis.getVoices();
-    let femaleVoice = voices.find(voice => voice.name.includes('Female') || voice.name.includes('Google UK English Female'));
+    console.log('voices', voices)
+    let femaleVoice;
+    if (browserName == 'safari') {
+      femaleVoice = voices.find(voice => voice.name.includes('Samantha') || voice.name.includes('Google UK English Female'));
+    }else{
+      femaleVoice = voices.find(voice => voice.name.includes('Female') || voice.name.includes('Google UK English Female'));
+    }
 
     if (!femaleVoice) {
       femaleVoice = voices.find(voice => voice.lang === 'en-US'); 
@@ -331,6 +365,9 @@ export default function chat() {
       /\[(.*?)\]\((.*?)\)/g,
       '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #595bcc;">$1</a><br>'
     );
+
+
+    text = text.replace(/^\s{4}[*-] (.*)/gm, '<li style="margin-left:20px;">$1</li>');
 
     // Wrap list items in <ul> if there are list items
     if (text.includes('<li>')) {
