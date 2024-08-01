@@ -97,13 +97,13 @@ export default function chat() {
       const currentTime = new Date().getTime();
       const dataAge = currentTime - parsedData.timestamp;
 
-      // if (dataAge < 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
+      if (dataAge < 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
         setResultData(parsedData.data);
-      // } else {
-      //   localStorage.removeItem("chatList");
+      } else {
+        localStorage.removeItem("chatList");
 
-      //   setResultData([]); // Clear the data if it's older than 24 hours
-      // }
+        setResultData([]); // Clear the data if it's older than 24 hours
+      }
     }
   }, []);
 
