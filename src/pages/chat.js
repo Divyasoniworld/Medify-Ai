@@ -41,10 +41,13 @@ export default function chat() {
   const { onSent, showResult, setShowResult, resultData, setResultData, setInput, input, } = useContext(Context)
 
   useEffect(() => {
-    let sesstionUser = JSON.parse(localStorage.getItem("medifyUser"))
-    setUser(sesstionUser)
-
-  }, [auth, router])
+    let sessionUser = JSON.parse(localStorage.getItem("medifyUser"));
+    if (sessionUser === undefined) {
+      router.push("/"); // Redirect to home route if sessionUser is undefined
+    } else {
+      setUser(sessionUser);
+    }
+  }, [auth, router]);
 
   const [showAlert, setShowAlert] = useState(true);
 
