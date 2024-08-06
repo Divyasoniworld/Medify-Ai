@@ -42,7 +42,7 @@ export default function chat() {
 
   useEffect(() => {
     let sessionUser = JSON.parse(localStorage.getItem("medifyUser"));
-    if (sessionUser === undefined) {
+    if (!sessionUser) {
       router.push("/"); // Redirect to home route if sessionUser is undefined
     } else {
       setUser(sessionUser);
