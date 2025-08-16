@@ -37,7 +37,6 @@ import {
 const MainNav = () => {
     const { theme, setTheme } = useTheme();
     const { user } = useAuth();
-    console.log("user", user)
     const { setInput, setResultData, setShowResult, language, setLanguage } = useContext(Context)
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);

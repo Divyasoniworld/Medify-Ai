@@ -41,7 +41,6 @@ export default function chat() {
 
   const { onSent, showResult, setShowResult, resultData, setResultData, setInput, input, loading } = useContext(Context)
 
-  console.log("resultData", resultData);
 
 
   useEffect(() => {
@@ -190,8 +189,6 @@ export default function chat() {
     return 'Unknown';
   };
 
-  // Example usage
-  console.log(`Browser: ${getBrowserName()}`);
 
 
 
@@ -217,8 +214,6 @@ export default function chat() {
       return;
     }
 
-    console.log('spech text', text)
-
     // Regex to remove emojis
     const emojiRegex = /([\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{1FB00}-\u{1FBFF}\u{1FC00}-\u{1FFFF}\u{2000}-\u{2BFF}\u{A700}-\u{A71F}\u{FE00}-\u{FE0F}\u{E0100}-\u{E01EF}])/gu;
     const asteriskRegex = /\*/g;
@@ -231,7 +226,6 @@ export default function chat() {
     const textChunks = cleanText.match(new RegExp('.{1,' + maxChunkLength + '}', 'g'));
 
     let voices = window.speechSynthesis.getVoices();
-    console.log('voices', voices)
     let femaleVoice;
     if (browserName == 'safari') {
       femaleVoice = voices.find(voice => voice.name.includes('Samantha') || voice.name.includes('Google UK English Female'));
@@ -520,7 +514,7 @@ export default function chat() {
                                 <div
                                   className="gemini-response"
                                   style={{
-                                    
+
                                   }}
                                   dangerouslySetInnerHTML={formatText(chat.message?.trim())}
                                 />
