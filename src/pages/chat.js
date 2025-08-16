@@ -355,40 +355,40 @@ export default function chat() {
 
   //formated response
   const formatText = (text) => {
-  if (!text) return { __html: '' };
+    if (!text) return { __html: '' };
 
-  // 1. Handle Headings first
-  text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-  text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    // 1. Handle Headings first
+    text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
 
-  // 2. Handle bold text
-  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // 2. Handle bold text
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-  // 3. Handle list items (both regular and indented)
-  text = text.replace(/^\s{2,}\* (.*)/gm, '<li style="margin-left: 20px;">$1</li>');
-  text = text.replace(/^[*-] (.*)/gm, '<li>$1</li>');
+    // 3. Handle list items (both regular and indented)
+    text = text.replace(/^\s{2,}\* (.*)/gm, '<li style="margin-left: 20px;">$1</li>');
+    text = text.replace(/^[*-] (.*)/gm, '<li>$1</li>');
 
-  // 4. Wrap consecutive list items in a single <ul> tag
-  // This looks for blocks of <li> tags and wraps them.
-  text = text.replace(/((<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>');
+    // 4. Wrap consecutive list items in a single <ul> tag
+    // This looks for blocks of <li> tags and wraps them.
+    text = text.replace(/((<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>');
 
-  // 5. Handle Markdown links
-  text = text.replace(
-    /\[(.*?)\]\((.*?)\)/g,
-    '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #595bcc;">$1</a>'
-  );
+    // 5. Handle Markdown links
+    text = text.replace(
+      /\[(.*?)\]\((.*?)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #595bcc;">$1</a>'
+    );
 
-  // 6. NOW, at the very end, handle newlines
-  text = text.replace(/\n/g, '<br>');
+    // 6. NOW, at the very end, handle newlines
+    text = text.replace(/\n/g, '<br>');
 
-  // 7. Clean up extra breaks around lists and headings
-  text = text.replace(/<br><ul>/g, '<ul>');
-  text = text.replace(/<\/ul><br>/g, '</ul>');
-  text = text.replace(/<\/h2><br>/g, '</h2>');
-  text = text.replace(/<\/h3><br>/g, '</h3>');
-  
-  return { __html: text };
-};
+    // 7. Clean up extra breaks around lists and headings
+    text = text.replace(/<br><ul>/g, '<ul>');
+    text = text.replace(/<\/ul><br>/g, '</ul>');
+    text = text.replace(/<\/h2><br>/g, '</h2>');
+    text = text.replace(/<\/h3><br>/g, '</h3>');
+
+    return { __html: text };
+  };
 
   const handleNewChat = () => {
     setShowResult(false)
@@ -400,7 +400,7 @@ export default function chat() {
   }
 
   const handleKeyUpSubmit = (e) => {
-    if (input.trim() != "") {
+    if (input.trim() != "" || preview != "") {
       if (e._reactName == "onClick") {
         e.preventDefault(); // Prevent the default action of adding a new line
         if (preview !== "") {
@@ -476,15 +476,15 @@ export default function chat() {
                   if (chat.role !== "AI") {
                     return (
                       <div key={index} className="flex items-start gap-3 justify-end">
-                        <div className="bg-primary rounded-lg p-3 max-w-[80%] text-primary-foreground">
+                        <div className="bg-primary rounded-lg p-1 max-w-[100%] text-primary-foreground">
                           {
                             chat?.image != "" && chat?.image != undefined ?
                               (
-                                <div className="w-16 h-32 md:w-20 md:h-30 mb-2">
+                                <div className="w-20 h-32 md:w-20 md:h-30">
                                   <img
                                     src={chat.image}
                                     alt="User Image"
-                                    className="w-full h-full object-cover rounded-lg"
+                                    className="w-full h-full rounded-md"
                                   />
                                 </div>
                               ) : ""
@@ -649,38 +649,45 @@ export default function chat() {
                     </Tooltip>
                   </TooltipProvider>
                   <div className="ml-auto flex items-center space-x-2" >
-                    <Button disabled={input.trim() === ""} size="icon" onClick={handleKeyUpSubmit}>
+                    <Button disabled={input.trim() === "" && preview === ""} size="icon" onClick={handleKeyUpSubmit}>
                       <SendHorizontal className="size-4" />
                       <span className="sr-only">Send</span>
                     </Button>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center p-3 pt-0">
-                  <div className="relative mr-2 mb-2">
+                {
+                  !isUploading ? (
+                    <div className="flex flex-wrap items-center p-3 pt-0">
+                      {
+                        preview && (
+                          <div className="relative mr-2 mb-2">
+                            <img src={preview} alt="Preview" className="h-16 w-16 rounded-md" />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={handleImageDelete}
+                              className="cancel_preview absolute top-0 right-7 m-1"
+                            >
+                              <CircleX className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )
 
-                    {
-                      !isUploading ?
-                        (
-                          preview ?
-                            (
-                              <>
-                                <img src={preview} alt="Preview" className="h-16 w-16 rounded-md" />
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleImageDelete()}
-                                  className="cancel_preview absolute top-0 right-7 m-1"
-                                >
-                                  <CircleX className="h-4 w-4" />
-                                </Button>
-                              </>
-                            )
-                            : ""
-                        ) :
-                        <Skeleton width={64} height={64} style={{ border: "3px solid rgb(212 212 212)" }} />
-                    }
-                  </div>
-                </div>
+
+                      }
+                    </div>
+                  ) : (
+                    <div className="mr-2 mb-2">
+                      <Skeleton
+                        width={64}
+                        height={64}
+                        style={{ border: "3px solid rgb(212 212 212)" }}
+                      />
+                    </div>
+                  )
+                }
+               
+
               </div>
             </div>
             <div className="text-sm md:text-md dark:text-white text-slate-600 flex justify-center items-center mt-2">
