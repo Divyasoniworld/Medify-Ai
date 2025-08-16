@@ -37,7 +37,8 @@ import {
 const MainNav = () => {
     const { theme, setTheme } = useTheme();
     const { user } = useAuth();
-    const { setInput, setResultData, setShowResult } = useContext(Context)
+    console.log("user", user)
+    const { setInput, setResultData, setShowResult, language, setLanguage } = useContext(Context)
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
@@ -86,6 +87,17 @@ const MainNav = () => {
         setIsDropdownOpen(false); // Close the dropdown menu
     }
 
+   const handleLanguageChange = (lang) => {
+  setLanguage(lang); // update React state
+
+  // Store in cookie, valid for 1 year
+  const expires = new Date();
+  expires.setFullYear(expires.getFullYear() + 1);
+
+  document.cookie = `lang=${lang}; path=/; expires=${expires.toUTCString()}`;
+};
+
+
     return (
         <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-50">
             <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
@@ -122,11 +134,31 @@ const MainNav = () => {
                     <div className="relative">
                     </div>
                 </form>
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="default">
+                            {language}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Select Language</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleLanguageChange("English")}>English</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleLanguageChange("Hindi")}>Hindi</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleLanguageChange("Gujarati")}>Gujarati</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
                 <Button variant="outline" size="icon" onClick={handleThemeChange}>
                     <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                     <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                     <span className="sr-only">Toggle theme</span>
                 </Button>
+
+
+
+
                 <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                     <DropdownMenuTrigger asChild>
                         <Button variant="secondary" size="icon" className="rounded-full" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
@@ -141,8 +173,8 @@ const MainNav = () => {
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleClearChat} ><Eraser className='size-4 mr-2 mt-1'/>Clear chat</DropdownMenuItem>
-                        <DropdownMenuItem onClick={openAlertDialog}><LogOut className='size-4 mr-2 mt-1'/>Logout</DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleClearChat} ><Eraser className='size-4 mr-2 mt-1' />Clear chat</DropdownMenuItem>
+                        <DropdownMenuItem onClick={openAlertDialog}><LogOut className='size-4 mr-2 mt-1' />Logout</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
 

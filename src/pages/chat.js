@@ -17,6 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import Skeleton from "react-loading-skeleton";
 import 'react-loading-skeleton/dist/skeleton.css'
+import Typewriter from "@/components/Typewriter";
 
 export default function chat() {
 
@@ -38,7 +39,10 @@ export default function chat() {
   const [fileName, setFileName] = useState('');
   const [isUploading, setIsUploading] = useState(false)
 
-  const { onSent, showResult, setShowResult, resultData, setResultData, setInput, input, } = useContext(Context)
+  const { onSent, showResult, setShowResult, resultData, setResultData, setInput, input, loading } = useContext(Context)
+
+  console.log("resultData", resultData);
+
 
   useEffect(() => {
     let sessionUser = JSON.parse(localStorage.getItem("medifyUser"));
@@ -168,7 +172,7 @@ export default function chat() {
 
   const getBrowserName = () => {
     const { userAgent } = navigator;
-    
+
     if (/firefox|fxios/i.test(userAgent)) {
       return 'Firefox';
     } else if (/chrome|crios|crmo/i.test(userAgent)) {
@@ -182,13 +186,13 @@ export default function chat() {
     } else if (/opera|opr\//i.test(userAgent)) {
       return 'Opera';
     }
-    
+
     return 'Unknown';
   };
-  
+
   // Example usage
   console.log(`Browser: ${getBrowserName()}`);
-  
+
 
 
 
@@ -205,7 +209,7 @@ export default function chat() {
   //speak function
   const handleSpeak = (text, index) => {
     let browserName = getBrowserName()
-    
+
     if (speakingMessageIndex === index) {
       // Stop the current speech
       window.speechSynthesis.cancel();
@@ -231,12 +235,12 @@ export default function chat() {
     let femaleVoice;
     if (browserName == 'safari') {
       femaleVoice = voices.find(voice => voice.name.includes('Samantha') || voice.name.includes('Google UK English Female'));
-    }else{
+    } else {
       femaleVoice = voices.find(voice => voice.name.includes('Female') || voice.name.includes('Google UK English Female'));
     }
 
     if (!femaleVoice) {
-      femaleVoice = voices.find(voice => voice.lang === 'en-US'); 
+      femaleVoice = voices.find(voice => voice.lang === 'en-US');
     }
 
     const speakChunk = (chunk, index) => {
@@ -357,33 +361,40 @@ export default function chat() {
 
   //formated response
   const formatText = (text) => {
-    // Replace **bold** with <strong>bold</strong>
-    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  if (!text) return { __html: '' };
 
-    // Replace - or * list item with <li>list item</li>
-    text = text.replace(/^[*-] (.*)/gm, '<li>$1</li>');
+  // 1. Handle Headings first
+  text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+  text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
 
-    // Handle URLs and add light blue color
-    text = text.replace(
-      /\[(.*?)\]\((.*?)\)/g,
-      '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #595bcc;">$1</a><br>'
-    );
+  // 2. Handle bold text
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
+  // 3. Handle list items (both regular and indented)
+  text = text.replace(/^\s{2,}\* (.*)/gm, '<li style="margin-left: 20px;">$1</li>');
+  text = text.replace(/^[*-] (.*)/gm, '<li>$1</li>');
 
-    text = text.replace(/^\s{4}[*-] (.*)/gm, '<li style="margin-left:20px;">$1</li>');
+  // 4. Wrap consecutive list items in a single <ul> tag
+  // This looks for blocks of <li> tags and wraps them.
+  text = text.replace(/((<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>');
 
-    // Wrap list items in <ul> if there are list items
-    if (text.includes('<li>')) {
-      text = text.replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>'); // Wrap <li> items in <ul> tags
-      text = text.replace(/<\/ul><ul>/g, ''); // Merge consecutive <ul> tags
-    }
+  // 5. Handle Markdown links
+  text = text.replace(
+    /\[(.*?)\]\((.*?)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #595bcc;">$1</a>'
+  );
 
-    // Replace new lines with <br> tags
-    text = text.replace(/\n/g, '<br>');
+  // 6. NOW, at the very end, handle newlines
+  text = text.replace(/\n/g, '<br>');
 
-    // Render as HTML
-    return { __html: text };
-  };
+  // 7. Clean up extra breaks around lists and headings
+  text = text.replace(/<br><ul>/g, '<ul>');
+  text = text.replace(/<\/ul><br>/g, '</ul>');
+  text = text.replace(/<\/h2><br>/g, '</h2>');
+  text = text.replace(/<\/h3><br>/g, '</h3>');
+  
+  return { __html: text };
+};
 
   const handleNewChat = () => {
     setShowResult(false)
@@ -473,7 +484,7 @@ export default function chat() {
                       <div key={index} className="flex items-start gap-3 justify-end">
                         <div className="bg-primary rounded-lg p-3 max-w-[80%] text-primary-foreground">
                           {
-                            chat.image != "" ?
+                            chat?.image != "" && chat?.image != undefined ?
                               (
                                 <div className="w-16 h-32 md:w-20 md:h-30 mb-2">
                                   <img
@@ -502,32 +513,50 @@ export default function chat() {
                         </Avatar>
                         <div className="bg-muted rounded-lg p-3 max-w-[80%]">
                           {
-                            typeof chat.message === 'string' && (
-                              <div dangerouslySetInnerHTML={formatText(chat.message?.trim())} />
+                            // 💡 Check if it's the last message AND the AI is loading.
+                            (index === resultData.length - 1 && loading) ? (
+                              // If YES, show the typewriter effect with a blinking cursor.
+                              <>
+                                <div
+                                  className="gemini-response"
+                                  style={{
+                                    
+                                  }}
+                                  dangerouslySetInnerHTML={formatText(chat.message?.trim())}
+                                />
+                                <span className="blinking-cursor">|</span>
+                              </>
+                            ) : (
+                              // If NO (it's a historical message), show the text instantly.
+                              <div
+                                className="gemini-response"
+                                dangerouslySetInnerHTML={formatText(chat.message?.trim())}
+                              />
                             )
                           }
-                          {
-                            chat.message == "loading..." ? "" :
-                              (
-                                <div className="flex gap-2 mt-2">
-                                  <Button variant="outline" size="icon" onClick={() => handleCopy(chat.message, index)}>
-                                    {copied == index ? <Check className="w-4 h-4 text-[#595bcc]" /> : <Copy size={24} className="w-4 h-4" />}
-                                  </Button>
-                                  {
-                                    (speakingMessageIndex == index) ?
-                                      (
-                                        <Button variant="outline" size="icon">
-                                          <Pause onClick={() => handleSpeak(chat.message, index)} className="w-4 h-4" />
-                                        </Button>
-                                      ) : (
-                                        <Button variant="outline" size="icon" onClick={() => handleSpeak(chat.message, index)}>
-                                          <Volume2 className="w-4 h-4" />
-                                        </Button>
-                                      )
-                                  }
 
-                                </div>
-                              )
+                          {
+                            // Show buttons if the message is not empty AND it's the last message and it's not loading
+                            (chat.message && !loading && index === resultData.length - 1) &&
+                            (
+                              <div className="flex gap-2 mt-2">
+                                <Button variant="outline" size="icon" onClick={() => handleCopy(chat.message, index)}>
+                                  {copied === index ? <Check className="w-4 h-4 text-[#595bcc]" /> : <Copy size={24} className="w-4 h-4" />}
+                                </Button>
+                                {
+                                  (speakingMessageIndex === index) ?
+                                    (
+                                      <Button variant="outline" size="icon">
+                                        <Pause onClick={() => handleSpeak(chat.message, index)} className="w-4 h-4" />
+                                      </Button>
+                                    ) : (
+                                      <Button variant="outline" size="icon" onClick={() => handleSpeak(chat.message, index)}>
+                                        <Volume2 className="w-4 h-4" />
+                                      </Button>
+                                    )
+                                }
+                              </div>
+                            )
                           }
                         </div>
                       </div>
@@ -537,7 +566,7 @@ export default function chat() {
               ) : (
                 <>
                   <Cards />
-                 
+
                 </>
 
               )}

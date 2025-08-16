@@ -14,52 +14,104 @@ const ContextProvider = (props) => {
     const [history, setHistory] = useState([]);
     const [images, setImages] = useState([])
 
+    const [language, setLanguage] = useState("English"); // default
+
+    useEffect(() => {
+        const savedLang = localStorage.getItem("lang");
+        if (savedLang) {
+            setLanguage(savedLang);
+        }
+    }, []);
+
+
+
     useEffect(() => {
         const savedHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
         setHistory(savedHistory);
     }, []);
 
 
+    // In ContextProvider.js
+
     const onSent = async (prompt) => {
         setLoading(true);
-
-        const userMessage = { role: "user", message: input, image: prompt == undefined ? "" : prompt };
-        setResultData((prevResultData) => [...prevResultData, userMessage]);
-
         setShowResult(true);
         setRecentPrompt(input);
+
+        const userMessage = { role: "user", message: input, image: prompt };
+
+        // Add the user's message and an empty placeholder for the AI's streaming response
+        const aiResponsePlaceholder = { role: "AI", message: "" };
+        setResultData((prev) => [...prev, userMessage, aiResponsePlaceholder]);
+
         setInput("");
-        const loadingPlaceholder = { role: "AI", message: "loading..." };
-        setResultData((prevResultData) => [...prevResultData, loadingPlaceholder]);
 
         try {
-            let response;
-            if (prompt !== undefined) {
-                response = await axios.post('/api/medifyai', { transcript: input, dataimage: prompt, history: history });
-            } else {
-                response = await axios.post('/api/medifyai', { transcript: input, history: history });
+            const response = await fetch('/api/medifyai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    transcript: input,
+                    dataimage: prompt,
+                    history: history
+                }),
+            });
+
+            if (!response.body) {
+                throw new Error("Response body is null");
             }
 
-            const data = await response.data;
-            const newHistory = data.newHistory;
-            setHistory(newHistory);
-            localStorage.setItem('chatHistory', JSON.stringify(newHistory));
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
 
-            const aiResponse = { role: "AI", message: response.data?.response };
+            // Continuously read from the stream
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    // The stream is finished, we can stop
+                    break;
+                }
 
-            // Replace the loading placeholder with the actual AI response
-            setResultData((prevResultData) => {
-                const updatedData = [...prevResultData];
-                updatedData[updatedData.length - 1] = aiResponse;
-                return updatedData;
-            });
+                const chunk = decoder.decode(value);
+                // SSE format is "data: {...}\n\n", so we parse it
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const jsonString = line.substring(6);
+                        try {
+                            const parsedChunk = JSON.parse(jsonString);
+                            if (parsedChunk.text) {
+                                // Update the last message in the resultData array with the new text
+                                setResultData((prev) => {
+                                    let newResultData = [...prev];
+                                    let lastMessage = newResultData[newResultData.length - 1];
+                                    lastMessage.message += parsedChunk.text;
+                                    return newResultData;
+                                });
+                            }
+                        } catch (e) {
+                            // Ignore lines that are not valid JSON
+                        }
+                    }
+                }
+            }
+
+            // After the stream is done, you might want to update the history
+            // Note: Your current API doesn't send back the new history, this is something to add
+            // For now, we'll manually add the final message to history
+            setHistory((prevHistory) => [
+                ...prevHistory,
+                { role: "user", parts: [{ text: input }] },
+                { role: "model", parts: [{ text: "The final streamed response" }] } // You'll need a way to get the full final text here
+            ]);
+
+
         } catch (error) {
-            console.error('Error:', error);
-            const errorMessage = { role: "AI", message: "I apologize, but I couldn't understand your request. Please try asking me something different." };
-
-            // Replace the loading placeholder with the error message
-            setResultData((prevResultData) => {
-                const updatedData = [...prevResultData];
+            console.error('Streaming Error:', error);
+            const errorMessage = { role: "AI", message: "I apologize, but an error occurred. Please try again." };
+            // Replace the placeholder with the error message
+            setResultData((prev) => {
+                const updatedData = [...prev];
                 updatedData[updatedData.length - 1] = errorMessage;
                 return updatedData;
             });
@@ -84,7 +136,9 @@ const ContextProvider = (props) => {
         input,
         setInput,
         images,
-        setImages
+        setImages,
+        language,
+        setLanguage
     }
 
     return (

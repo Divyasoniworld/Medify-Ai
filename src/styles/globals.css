@@ -28,26 +28,26 @@
   }
 
   .dark {
-    --background: 224 71.4% 4.1%;
+    --background: 224 71.4% 8%; /* Increased from 4.1% */
     --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
+    --card: 224 71.4% 8%; /* Increased from 4.1% */
     --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
+    --popover: 224 71.4% 8%; /* Increased from 4.1% */
     --popover-foreground: 210 20% 98%;
     --primary: 210 20% 98%;
-    --primary-foreground: 220.9 39.3% 11%;
-    --secondary: 215 27.9% 16.9%;
+    --primary-foreground: 220.9 39.3% 15%; /* Increased from 11% */
+    --secondary: 215 27.9% 20%; /* Increased from 16.9% */
     --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
+    --muted: 215 27.9% 20%; /* Increased from 16.9% */
+    --muted-foreground: 217.9 10.6% 70%; /* Increased from 64.9% */
+    --accent: 215 27.9% 20%; /* Increased from 16.9% */
     --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 35%; /* Increased from 30.6% */
     --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
+    --border: 215 27.9% 20%; /* Increased from 16.9% */
+    --input: 215 27.9% 20%; /* Increased from 16.9% */
     --ring: 216 12.2% 83.9%;
-  }
+}
 }
 
 @layer base {
@@ -200,5 +200,28 @@ body {
 
   50% {
     transform: translateY(-10px);
+  }
+}
+
+
+/* styles/globals.css */
+
+.blinking-cursor {
+  font-weight: bold;
+  font-size: 1.1em; /* Make it slightly taller */
+  color: #595bcc; /* Or your preferred theme color */
+  
+  /* The blink animation */
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  /* At the start, middle, and end of the animation, the cursor is visible */
+  0%, 100% { 
+    opacity: 1; 
+  }
+  /* Halfway through, it's invisible */
+  50% { 
+    opacity: 0; 
   }
 }
