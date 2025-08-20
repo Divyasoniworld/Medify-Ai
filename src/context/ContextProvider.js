@@ -16,10 +16,15 @@ const ContextProvider = (props) => {
 
     const [language, setLanguage] = useState("English"); // default
 
-    useEffect(() => {
-        const savedLang = localStorage.getItem("lang");
-        if (savedLang) {
-            setLanguage(savedLang);
+     useEffect(() => {
+        // FIX: Read language from the cookie to match what MainNav.js saves.
+        const cookies = document.cookie.split('; ');
+        const languageCookie = cookies.find(row => row.startsWith('lang='));
+        
+        if (languageCookie) {
+            const savedLanguage = languageCookie.split('=')[1];
+            console.log("languageCookie",savedLanguage);
+            setLanguage(savedLanguage);
         }
     }, []);
 

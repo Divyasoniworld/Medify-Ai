@@ -39,6 +39,9 @@ const MainNav = () => {
     const { user } = useAuth();
     const { setInput, setResultData, setShowResult, language, setLanguage } = useContext(Context)
 
+    console.log("language",language);
+    
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);

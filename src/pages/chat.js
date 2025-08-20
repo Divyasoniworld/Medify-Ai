@@ -466,7 +466,7 @@ export default function chat() {
           </nav>
 
         </aside>
-        <div className="main-chat-div flex-1 flex flex-col">
+        <div className="main-chat-div flex-1 flex flex-col overflow-x-hidden">
           <MainNav />
           <div className="flex-1 overflow-auto pt-16 p-4 custom-scrollbar" ref={chatContainerRef}>
             <div className="grid gap-4">
@@ -476,7 +476,7 @@ export default function chat() {
                   if (chat.role !== "AI") {
                     return (
                       <div key={index} className="flex items-start gap-3 justify-end">
-                        <div className="bg-primary rounded-lg p-1 max-w-[100%] text-primary-foreground">
+                        <div className="bg-primary rounded-lg p-2 max-w-[80%] text-primary-foreground">
                           {
                             chat?.image != "" && chat?.image != undefined ?
                               (
