@@ -1,0 +1,19 @@
+{
+  "name": "MedifyAi",
+  "short_name": "MedifyAi",
+  "description": "Know your meds, simplify your health",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4A4FF0",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/app.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
